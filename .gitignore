@@ -16,4 +16,6 @@
 *.tar.gz
 *.rar
 
-gradle/
+# Pull in repo the gradle JAR for easy automation upon cloning
+!/gradle/wrapper/gradle-wrapper.jar
+
