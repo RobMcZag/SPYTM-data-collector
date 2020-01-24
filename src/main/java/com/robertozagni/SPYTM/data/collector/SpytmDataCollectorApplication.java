@@ -1,5 +1,6 @@
 package com.robertozagni.SPYTM.data.collector;
 
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,8 +21,8 @@ public class SpytmDataCollectorApplication {
 	}
 
 	@Bean
-	public CommandLineRunner run(RestTemplate restTemplate) throws Exception {
-		return new StockDataDownloader(restTemplate);
+	public CommandLineRunner createRunner(RestTemplate restTemplate) throws Exception {
+		return new StockDataDownloader(new AlphaVantageDownloader(restTemplate));
 	}
 
 }
