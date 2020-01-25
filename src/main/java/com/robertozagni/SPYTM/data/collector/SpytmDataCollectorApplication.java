@@ -22,7 +22,7 @@ public class SpytmDataCollectorApplication {
 
 	@Bean
 	public CommandLineRunner createRunner(RestTemplate restTemplate) throws Exception {
-		return new StockDataDownloader(new AlphaVantageDownloader(restTemplate));
+		return new StockDataDownloaderRunner(new AlphaVantageDownloader(restTemplate));
 	}
 
 }

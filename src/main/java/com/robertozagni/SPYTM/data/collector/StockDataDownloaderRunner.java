@@ -1,12 +1,19 @@
 package com.robertozagni.SPYTM.data.collector;
 
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
+import com.robertozagni.SPYTM.data.collector.model.DataSeries;
+import com.robertozagni.SPYTM.data.collector.model.DataServices;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Downloads the required time-serie for the required symbols.
@@ -14,12 +21,15 @@ import java.util.List;
  * app [time-serie] [symbols...]
  */
 @Slf4j
-public class StockDataDownloader implements CommandLineRunner {
+public class StockDataDownloaderRunner implements CommandLineRunner {
     private static final String timeSerie = "TIME_SERIES_DAILY_ADJUSTED";
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private final AlphaVantageDownloader alphaVantageDownloader;
 
-    public StockDataDownloader(AlphaVantageDownloader alphaVantageDownloader) {
+    public StockDataDownloaderRunner(AlphaVantageDownloader alphaVantageDownloader) {
         this.alphaVantageDownloader = alphaVantageDownloader;
     }
 
@@ -57,9 +67,27 @@ public class StockDataDownloader implements CommandLineRunner {
 
             case APLPHA_VANTAGE:
             default:
-                alphaVantageDownloader.download(dataSeries, symbols);
+                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(dataSeries, symbols);
+                for (String symbol:timeSeries.keySet()) {
+                    logDataInfo(timeSeries.get(symbol));
+                }
                 break;
         }
 
+        SpringApplication.exit(applicationContext, () -> 0);
     }
+
+    private void logDataInfo(TimeSerie ts) {
+        log.info("=========");
+        log.info(ts.getMetadata().getSeriesInfo());
+        log.info(ts.getMetadata().getSymbol());
+        log.info(ts.getMetadata().getLastRefreshed() + " - " + ts.getMetadata().getTimeZone());
+        log.info(ts.getMetadata().getOutputSize());
+        log.info("--");
+        log.info("Rows of stock data: " + String.valueOf(ts.getData().size()));
+        Optional<String> firstDate = ts.getData().keySet().stream().findFirst();
+        firstDate.ifPresent(s -> log.info("First day: " + s + " ==> " + ts.getData().get(s)));
+        log.info("=========");
+    }
+
 }

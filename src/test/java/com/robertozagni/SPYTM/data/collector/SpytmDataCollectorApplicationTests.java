@@ -1,22 +1,18 @@
 package com.robertozagni.SPYTM.data.collector;
 
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.StockData;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.TimeSerieData;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.TimeSerieMetadata;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
+import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData;
+import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
+import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerieMetadata;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.matchers.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -35,17 +31,26 @@ class SpytmDataCollectorApplicationTests {
 
 	@Test
 	void commandLineRunner_bean_exists_and_calls_correct_template() throws Exception {
-		TimeSerieData emptyTimeSerieData = makeEmptyTimeSerieData();
-		Mockito.when(mockTemplate.getForObject(anyString(), eq(TimeSerieData.class)))
-				.thenReturn(emptyTimeSerieData);
+		AVTimeSerie emptyAVTimeSerie = makeEmptyTimeSerieData();
+		Mockito.when(mockTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
+				.thenReturn(emptyAVTimeSerie);
 
 		commandLineRunner.run("TIME_SERIES_DAILY_ADJUSTED", "MSFT", "AAPL");
 
-		verify(mockTemplate, times(2)).getForObject(anyString(), eq(TimeSerieData.class));;
+		verify(mockTemplate, times(2)).getForObject(anyString(), eq(AVTimeSerie.class));;
 	}
 
-	private TimeSerieData makeEmptyTimeSerieData(){
-		return new TimeSerieData(new TimeSerieMetadata(), new HashMap<String, StockData>());
+	private AVTimeSerie makeEmptyTimeSerieData(){
+		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<String, AVStockData>());
+	}
+
+	private AVTimeSerieMetadata makeTestTimeSerieMetadata() {
+		return new AVTimeSerieMetadata(
+				"Daily data",
+				"APPL",
+				"2020-09-27",
+				"compact",
+				"US/SomePlace");
 	}
 
 }

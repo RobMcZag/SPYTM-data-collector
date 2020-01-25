@@ -1,6 +1,6 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data.collector.model;
 
-import com.robertozagni.SPYTM.data.collector.DataServices;
+import com.robertozagni.SPYTM.data.collector.model.DataServices;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

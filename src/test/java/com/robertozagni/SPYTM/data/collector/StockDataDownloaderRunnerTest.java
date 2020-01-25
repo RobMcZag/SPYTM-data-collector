@@ -1,12 +1,11 @@
 package com.robertozagni.SPYTM.data.collector;
 
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
-import org.junit.jupiter.api.Assertions;
+import com.robertozagni.SPYTM.data.collector.model.DataSeries;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -15,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class StockDataDownloaderTest {
+public class StockDataDownloaderRunnerTest {
     @BeforeEach
     void initMocks() {
         MockitoAnnotations.initMocks(this);
@@ -26,7 +25,7 @@ public class StockDataDownloaderTest {
     void dataSerie_and_symbols_are_parsed_and_passed() throws Exception {
         ArgumentCaptor<List<String>> symbols = ArgumentCaptor.forClass(List.class);
 
-        StockDataDownloader downloader = new StockDataDownloader(mockAVDownloader);
+        StockDataDownloaderRunner downloader = new StockDataDownloaderRunner(mockAVDownloader);
         downloader.run("TIME_SERIES_DAILY_ADJUSTED", "MSFT", "AAPL");
 
         verify(mockAVDownloader, times(1))
@@ -41,7 +40,7 @@ public class StockDataDownloaderTest {
         DataSeries defaultDataSeries = DataSeries.TIME_SERIES_DAILY_ADJUSTED;
         ArgumentCaptor<List<String>> symbols = ArgumentCaptor.forClass(List.class);
 
-        StockDataDownloader downloader = new StockDataDownloader(mockAVDownloader);
+        StockDataDownloaderRunner downloader = new StockDataDownloaderRunner(mockAVDownloader);
         downloader.run("MSFT", "AAPL", "XYZ");
 
         verify(mockAVDownloader, times(1))
@@ -54,7 +53,7 @@ public class StockDataDownloaderTest {
     @Test
     void test_dataSerie_trows_exception() throws Exception {
 
-        StockDataDownloader downloader = new StockDataDownloader(mockAVDownloader);
+        StockDataDownloaderRunner downloader = new StockDataDownloaderRunner(mockAVDownloader);
 
         Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
             downloader.run("TEST_SERIE", "AAPL", "XYZ");
