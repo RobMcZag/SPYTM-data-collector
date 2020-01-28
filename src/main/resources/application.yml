@@ -1,0 +1,31 @@
+spring:
+  profiles:
+    active: test
+
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spytm_test_db
+    username: spytm_test_user
+    password: 1234-test-PW
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create  # create |
+
+---
+spring:
+  profiles: prod
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spytm_prod_db
+    username: ${spytm_prod_user}    # From environment
+    password: ${spytm_prod_pw}      # From environment
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create  # create |
