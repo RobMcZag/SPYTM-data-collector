@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +24,6 @@ import java.util.Optional;
 @Slf4j
 public class StockDataDownloaderRunner implements CommandLineRunner {
     private static final String timeSerie = "TIME_SERIES_DAILY_ADJUSTED";
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     private final AlphaVantageDownloader alphaVantageDownloader;
 
@@ -74,7 +72,6 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
                 break;
         }
 
-        SpringApplication.exit(applicationContext, () -> 0);
     }
 
     private void logDataInfo(TimeSerie ts) {
