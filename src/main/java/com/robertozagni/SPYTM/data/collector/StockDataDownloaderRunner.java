@@ -1,15 +1,10 @@
 package com.robertozagni.SPYTM.data.collector;
 
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
-import com.robertozagni.SPYTM.data.collector.model.DataSeries;
-import com.robertozagni.SPYTM.data.collector.model.DataServices;
+import com.robertozagni.SPYTM.data.collector.model.DataSerie;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,30 +37,30 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        DataServices dataService;
+        DataSerie.DataProvider dataProvider;
         List<String> symbols = new ArrayList<>();
-        DataSeries dataSeries = DataSeries.TIME_SERIES_DAILY_ADJUSTED;
+        DataSerie dataSerie = DataSerie.TIME_SERIES_DAILY_ADJUSTED;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (i == 0) {
                 try {
-                    dataSeries = DataSeries.valueOf(arg);
+                    dataSerie = DataSerie.valueOf(arg);
                     continue;
                 } catch (IllegalArgumentException ignored) { }   // Not a series, then it is a symbol :)
             }
             symbols.add(arg);
         }
 
-        dataService = dataSeries.getDatService();
+        dataProvider = dataSerie.getDataProvider();
 
-        switch (dataService) {
+        switch (dataProvider) {
             case TEST:
                 throw new UnsupportedOperationException("No test service defined at this time");
 
             case APLPHA_VANTAGE:
             default:
-                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(dataSeries, symbols);
+                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(dataSerie, symbols);
                 for (String symbol:timeSeries.keySet()) {
                     logDataInfo(timeSeries.get(symbol));
                 }

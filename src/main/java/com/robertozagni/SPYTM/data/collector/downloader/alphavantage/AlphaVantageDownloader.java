@@ -1,9 +1,9 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.robertozagni.SPYTM.data.collector.model.DataSeries;
+import com.robertozagni.SPYTM.data.collector.model.DataSerie;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerieStockData;
+import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
 import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData;
 import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.collector.downloader.Downloader {
@@ -33,22 +32,24 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     }
 
     @Override
-    public Map<String, TimeSerie> download(DataSeries dataSeries, List<String> symbols) {
+    public Map<String, TimeSerie> download(DataSerie dataSerie, List<String> symbols) {
         Map<String, TimeSerie> result = new HashMap<>();
         for (String symbol: symbols) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
-                    .queryParam("function", dataSeries.name())
+                    .queryParam("function", dataSerie.name())
                     .queryParam("symbol", symbol)
                     .queryParam("apikey", API_KEY);
             String url = builder.toUriString();
 
             log.debug("** Downloading " + url);
             try {
+
                 AVTimeSerie data = restTemplate.getForObject(url, AVTimeSerie.class);
                 assert data != null;
                 result.put(symbol, mapAVDataToModel(data));
+
             } catch (RestClientException e) {
-                log.error("Error while attemptiong to download data from " + url, e);
+                log.error("Error while attempting to download data from " + url, e);
             }
         }
         return result;
@@ -58,11 +59,16 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     static public TimeSerie mapAVDataToModel(AVTimeSerie avdata) {
         TimeSerieMetadata metaData = avdata.getMetadata().toTimeSerieMetadata();
 
-        Map<String, TimeSerieStockData> timeSerieStockData = new HashMap<>();
+        Map<String, DailyQuote> timeSerieStockData = new HashMap<>();
         for (String tradingDate: avdata.getStockData().keySet()) {
-            AVStockData sd = avdata.getStockData().get(tradingDate);
-            sd.setDateTime(toUTCTime(tradingDate, metaData.getTimeZone()));
-            timeSerieStockData.put(tradingDate, sd.toTimeSerieStockData());
+            AVStockData dailyQuote = avdata.getStockData().get(tradingDate);
+
+            // TODO Replace with info from metaData
+            dailyQuote.setSerie(DataSerie.TIME_SERIES_DAILY_ADJUSTED);      // for now we always download this serie
+            dailyQuote.setSymbol(metaData.getSymbol());
+            dailyQuote.setDate(parseTradingDateTime(tradingDate).toLocalDate());
+
+            timeSerieStockData.put(tradingDate, dailyQuote.toTimeSerieStockData());
         }
         return new TimeSerie(metaData, timeSerieStockData);
 
@@ -70,12 +76,12 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
 
     static public LocalDateTime toUTCTime(String tradingDate, String timeZone) {
         ZoneId originZone = ZoneId.of(timeZone);
-        LocalDateTime originLDT = parseTradingDate(tradingDate);
+        LocalDateTime originLDT = parseTradingDateTime(tradingDate);
         ZonedDateTime originZDT = ZonedDateTime.of(originLDT, originZone);
         return originZDT.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
-    private static LocalDateTime parseTradingDate(String tradingDate) {
+    private static LocalDateTime parseTradingDateTime(String tradingDate) {
         String tradingDateTime;
         if (tradingDate.contains(":")) {
             tradingDateTime = tradingDate;

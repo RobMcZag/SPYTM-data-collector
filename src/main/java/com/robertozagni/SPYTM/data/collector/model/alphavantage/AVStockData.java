@@ -1,9 +1,13 @@
 package com.robertozagni.SPYTM.data.collector.model.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerieStockData;
+import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
+import com.robertozagni.SPYTM.data.collector.model.DataSerie;
+import com.robertozagni.SPYTM.data.collector.model.Quote;
 import lombok.*;
 
+import javax.persistence.Id;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData.Constants.*;
 
@@ -11,7 +15,10 @@ import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockDa
 @AllArgsConstructor
 public class AVStockData {
 
-    private LocalDateTime dateTime;
+    private DataSerie serie;
+    private String symbol;
+    private LocalDate date;
+
     @JsonProperty(value = OPEN_MARKER) private double open;
     @JsonProperty(value = HIGH_MARKER) private double high;
     @JsonProperty(value = LOW_MARKER) private double low;
@@ -21,9 +28,14 @@ public class AVStockData {
     @JsonProperty(value = DIVIDEND_MARKER) private double dividendAmount;
     @JsonProperty(value = SPLIT_MARKER) private double splitCoefficient;
 
-    public TimeSerieStockData toTimeSerieStockData() {
-        return new TimeSerieStockData(
-                dateTime, open, high, low, close, adjustedClose, volume, dividendAmount, splitCoefficient);
+    public DailyQuote toTimeSerieStockData() {
+        return DailyQuote.builder()
+                .serie(serie).symbol(symbol).date(date)  // Quote key
+                .quote(Quote.builder().open(open).high(high).low(low).close(close).volume(volume).build())
+                .adjustedClose(adjustedClose)
+                .dividendAmount(dividendAmount)
+                .splitCoefficient(splitCoefficient)
+                .build();
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
