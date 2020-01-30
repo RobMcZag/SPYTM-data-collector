@@ -1,8 +1,8 @@
 HELP.md
 build/
+generated/
 
 # Gradle configs
 .gradle/
 # Pull in repo the gradle JAR for easy automation upon cloning
 !/gradle/wrapper/gradle-wrapper.jar
-

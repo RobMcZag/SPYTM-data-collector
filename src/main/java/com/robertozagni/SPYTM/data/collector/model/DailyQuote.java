@@ -16,7 +16,7 @@ public class DailyQuote {
 
     @Id @Enumerated(EnumType.STRING) private DataSerie serie;
     @Id @Column(length = 30) private String symbol;
-    @Id @Temporal(TemporalType.DATE) private LocalDate date;
+    @Id private LocalDate date;     // @Temporal(TemporalType.DATE)
 
     @Embedded
     @Delegate
