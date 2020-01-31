@@ -51,7 +51,7 @@ public class AlphaVantageDownloaderSpringTest {
         File file = ResourceUtils.getFile("classpath:static/alphavantage/MSFT.json");
         String content = new String(Files.readAllBytes(file.toPath()));
 
-        String url = "https://www.alphavantage.co/query?function=TIME_SERIE_DAILY&symbol=MSFT&apikey=SHGHQ9MPDSLJSKO5";
+        String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=SHGHQ9MPDSLJSKO5";
         mockServer.expect(ExpectedCount.once(),
                 requestTo(new URI(url)))
                 .andExpect(method(HttpMethod.GET))

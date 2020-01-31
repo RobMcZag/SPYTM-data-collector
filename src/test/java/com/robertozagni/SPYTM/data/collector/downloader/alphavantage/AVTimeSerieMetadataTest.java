@@ -1,5 +1,6 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
 import org.junit.jupiter.api.Test;
 

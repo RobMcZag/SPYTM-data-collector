@@ -1,5 +1,6 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDailyQuote;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;

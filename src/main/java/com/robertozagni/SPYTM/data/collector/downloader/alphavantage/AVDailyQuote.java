@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
@@ -9,7 +9,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVDailyQuote.Constants.*;
+import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDailyQuote.Constants.*;
 
 /**
  * Data structure for receiving quotes with full day pricing, including eventual adjusting info,

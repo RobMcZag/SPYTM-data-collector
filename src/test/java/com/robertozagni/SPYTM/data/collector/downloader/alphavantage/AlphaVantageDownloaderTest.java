@@ -2,7 +2,6 @@ package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

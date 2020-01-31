@@ -1,5 +1,6 @@
 package com.robertozagni.SPYTM.data.collector;
 
+import com.robertozagni.SPYTM.data.collector.downloader.StockDataDownloaderRunner;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import org.junit.jupiter.api.BeforeEach;

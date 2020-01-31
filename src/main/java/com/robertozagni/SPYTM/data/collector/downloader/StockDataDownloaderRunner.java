@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data.collector.downloader;
 
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;

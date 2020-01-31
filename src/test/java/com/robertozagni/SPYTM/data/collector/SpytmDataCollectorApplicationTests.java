@@ -1,8 +1,8 @@
 package com.robertozagni.SPYTM.data.collector;
 
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVDailyQuote;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerieMetadata;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDailyQuote;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

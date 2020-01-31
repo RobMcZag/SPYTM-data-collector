@@ -1,10 +1,8 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AVTimeSerieTest {
 
-    @Test 
+    @Test
     void toModel() {
         AVTimeSerie avTimeSerie = makeAVTimeSerie();
         TimeSerie timeSerie = avTimeSerie.toModel();

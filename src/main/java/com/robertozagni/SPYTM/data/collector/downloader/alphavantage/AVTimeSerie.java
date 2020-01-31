@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie.Constants.*;
+import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie.Constants.*;
 
 @Data @AllArgsConstructor
 public class AVTimeSerie {
