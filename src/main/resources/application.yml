@@ -12,6 +12,7 @@ spring:
     initialization-mode: always   # explicitly enable (as not using an embedded db)
   flyway:
     locations: classpath:/db/migration
+    schemas: spytm    # schema1,schema2,schema3
   jpa:
     open-in-view: false
     hibernate:

@@ -1,10 +1,12 @@
 package com.robertozagni.SPYTM.data.collector;
 
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
-import com.robertozagni.SPYTM.data.collector.model.DataSerie;
+import com.robertozagni.SPYTM.data.collector.model.QuoteType;
+import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,30 +39,33 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        DataSerie.DataProvider dataProvider;
+        QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
+        QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
         List<String> symbols = new ArrayList<>();
-        DataSerie dataSerie = DataSerie.TIME_SERIES_DAILY_ADJUSTED;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (i == 0) {
+            if (i < 2) {
                 try {
-                    dataSerie = DataSerie.valueOf(arg);
+                    quoteType = QuoteType.valueOf(arg);
                     continue;
-                } catch (IllegalArgumentException ignored) { }   // Not a series, then it is a symbol :)
+                } catch (IllegalArgumentException ignored) { }   // Not a serie type
+                try {
+                    quoteProvider = QuoteProvider.valueOf(arg);
+                    continue;
+                } catch (IllegalArgumentException ignored) { }   // Not a provider
             }
             symbols.add(arg);
         }
 
-        dataProvider = dataSerie.getDataProvider();
 
-        switch (dataProvider) {
-            case TEST:
+        switch (quoteProvider) {
+            case TEST_PROVIDER:
                 throw new UnsupportedOperationException("No test service defined at this time");
 
             case APLPHA_VANTAGE:
             default:
-                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(dataSerie, symbols);
+                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(quoteType, symbols);
                 for (String symbol:timeSeries.keySet()) {
                     logDataInfo(timeSeries.get(symbol));
                 }

@@ -14,7 +14,8 @@ import java.time.LocalDate;
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class DailyQuote {
 
-    @Id @Enumerated(EnumType.STRING) private DataSerie serie;
+    @Id @Enumerated(EnumType.STRING) private QuoteProvider provider;
+    @Id @Enumerated(EnumType.STRING) private QuoteType quotetype;
     @Id @Column(length = 30) private String symbol;
     @Id private LocalDate date;     // @Temporal(TemporalType.DATE)
 
@@ -28,8 +29,8 @@ public class DailyQuote {
 
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class DailyQuoteId implements Serializable {
-
-        private DataSerie serie;
+        private QuoteProvider provider;
+        private QuoteType quotetype;
         private String symbol;
         private LocalDate date;
     }

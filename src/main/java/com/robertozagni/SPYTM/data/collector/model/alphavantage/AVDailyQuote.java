@@ -2,23 +2,30 @@ package com.robertozagni.SPYTM.data.collector.model.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
-import com.robertozagni.SPYTM.data.collector.model.DataSerie;
+import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
+import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.Quote;
 import lombok.*;
 
-import javax.persistence.Id;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData.Constants.*;
 
-@Data
-@AllArgsConstructor
-public class AVStockData {
+import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVDailyQuote.Constants.*;
 
-    private DataSerie serie;
+/**
+ * Data structure for receiving quotes with full day pricing, including eventual adjusting info,
+ * received trough the wire in JSON format by Alpha Vantage APIs.
+ *
+ * This class has extra fields to be able to enrich the object and convert it to the Model representation.
+ */
+@Data @AllArgsConstructor
+public class AVDailyQuote {
+
+    /* Extra fields to be able to enrich the object and convert it to the Model representation */
+    private QuoteType quotetype;
     private String symbol;
     private LocalDate date;
 
+    /* Fields containing the data sent trough the wire in JSON format. */
     @JsonProperty(value = OPEN_MARKER) private double open;
     @JsonProperty(value = HIGH_MARKER) private double high;
     @JsonProperty(value = LOW_MARKER) private double low;
@@ -30,7 +37,8 @@ public class AVStockData {
 
     public DailyQuote toTimeSerieStockData() {
         return DailyQuote.builder()
-                .serie(serie).symbol(symbol).date(date)  // Quote key
+                .provider(QuoteProvider.APLPHA_VANTAGE)
+                .quotetype(quotetype).symbol(symbol).date(date)  // Quote key
                 .quote(Quote.builder().open(open).high(high).low(low).close(close).volume(volume).build())
                 .adjustedClose(adjustedClose)
                 .dividendAmount(dividendAmount)
