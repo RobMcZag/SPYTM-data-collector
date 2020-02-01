@@ -4,9 +4,12 @@ import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantag
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +23,14 @@ import java.util.Optional;
  */
 @Slf4j
 public class StockDataDownloaderRunner implements CommandLineRunner {
-    private static final String timeSerie = "TIME_SERIES_DAILY_ADJUSTED";
 
-    private final AlphaVantageDownloader alphaVantageDownloader;
+    private final RestTemplate restTemplate;
+    // private final DailyQuoteStorageService dailyQuoteStorageService;
+    private final TimeSerieStorageService timeSerieStorageService;
 
-    public StockDataDownloaderRunner(AlphaVantageDownloader alphaVantageDownloader) {
-        this.alphaVantageDownloader = alphaVantageDownloader;
+    public StockDataDownloaderRunner(RestTemplate restTemplate, TimeSerieStorageService timeSerieStorageService) {
+        this.restTemplate = restTemplate;
+        this.timeSerieStorageService = timeSerieStorageService;
     }
 
     /**
@@ -39,52 +44,73 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
+        DownloadConfig cfg = parseArgs(args);
+
+        Map<String, TimeSerie> timeSeries = downloadQuotes(cfg);
+        saveTimeSeries(timeSeries);
+    }
+
+    private void saveTimeSeries(Map<String, TimeSerie> timeSeries) {
+        for (TimeSerie ts:timeSeries.values()) {
+            TimeSerie savedQuotesTS = timeSerieStorageService.save(ts);
+            log.info(String.format("Saved %d %s quotes for %s from %s!",
+                    savedQuotesTS.getData().size(),
+                    savedQuotesTS.getMetadata().getQuotetype(),
+                    savedQuotesTS.getMetadata().getSymbol(),
+                    savedQuotesTS.getMetadata().getProvider() ));
+        }
+    }
+
+    private Map<String, TimeSerie> downloadQuotes(DownloadConfig cfg) {
+        switch (cfg.quoteProvider) {
+            case TEST_PROVIDER:
+                throw new UnsupportedOperationException("No test service defined at this time!");
+
+            case APLPHA_VANTAGE:
+                return new AlphaVantageDownloader(restTemplate).download(cfg.quoteType, cfg.symbols);
+
+            default:
+                throw new IllegalArgumentException("Requested unknown quote provider:" + cfg.quoteProvider);
+        }
+    }
+
+    DownloadConfig parseArgs(String[] args) {
         QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
         QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
         List<String> symbols = new ArrayList<>();
 
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            if (i < 2) {
-                try {
-                    quoteType = QuoteType.valueOf(arg);
-                    continue;
-                } catch (IllegalArgumentException ignored) { }   // Not a serie type
-                try {
-                    quoteProvider = QuoteProvider.valueOf(arg);
-                    continue;
-                } catch (IllegalArgumentException ignored) { }   // Not a provider
-            }
-            symbols.add(arg);
+        for (String arg: args) {
+            try {
+                quoteType = QuoteType.valueOf(arg);
+                continue;
+            } catch (IllegalArgumentException ignored) { }   // Not a serie type
+            try {
+                quoteProvider = QuoteProvider.valueOf(arg);
+                continue;
+            } catch (IllegalArgumentException ignored) { }   // Not a provider
+
+            symbols.add(arg);                                // Then it's a symbol ! :)
         }
-
-
-        switch (quoteProvider) {
-            case TEST_PROVIDER:
-                throw new UnsupportedOperationException("No test service defined at this time");
-
-            case APLPHA_VANTAGE:
-            default:
-                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(quoteType, symbols);
-                for (String symbol:timeSeries.keySet()) {
-                    logDataInfo(timeSeries.get(symbol));
-                }
-                break;
-        }
-
+        return new DownloadConfig(quoteType, quoteProvider, symbols);
     }
 
     private void logDataInfo(TimeSerie ts) {
         log.info("=========");
-        log.info(ts.getMetadata().getSeriesInfo());
         log.info(ts.getMetadata().getSymbol());
+        log.info(ts.getMetadata().getDescription());
         log.info(ts.getMetadata().getLastRefreshed() + " - " + ts.getMetadata().getTimeZone());
-        log.info(ts.getMetadata().getOutputSize());
         log.info("--");
-        log.info("Rows of stock data: " + String.valueOf(ts.getData().size()));
+        log.info("Rows of stock data: " + ts.getData().size());
         Optional<String> firstDate = ts.getData().keySet().stream().findFirst();
         firstDate.ifPresent(s -> log.info("First day: " + s + " ==> " + ts.getData().get(s)));
         log.info("=========");
+    }
+
+    @AllArgsConstructor
+     static class DownloadConfig {
+        QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
+        QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
+        List<String> symbols = new ArrayList<>();
     }
 
 }

@@ -27,6 +27,10 @@ public class DailyQuote {
     private double dividendAmount;
     private double splitCoefficient;
 
+    public DailyQuoteId getId() {
+        return new DailyQuoteId(provider, quotetype, symbol, date);
+    }
+
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class DailyQuoteId implements Serializable {
         private QuoteProvider provider;
