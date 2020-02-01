@@ -6,15 +6,34 @@ spring:
 spring:
   profiles: test
   datasource:
-    url: jdbc:postgresql://localhost:5432/spytm_test_db
+    url: jdbc:postgresql://localhost:5432/spytm_test_db    # Schema defined below in properties.hibernate.default_schema
     username: spytm_test_user
     password: 1234-test-PW
+    initialization-mode: always   # explicitly enable (as not using an embedded db)
+  flyway:
+    locations: classpath:/db/migration
+    schemas: spytm    # schema1,schema2,schema3
   jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate  # validate as we use Flyway // create | create-drop | validate | update | none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: create  # create |
+        default_schema: spytm     # Define schema to use (instead of the PG default 'public')
+      javax:
+        persistence:
+# Uncomment to generate DDL files
+#          create-database-schemas: true
+#          schema-generation:
+#            create-source: metadata
+#            drop-source: metadata
+#            scripts:
+#              action: drop-and-create    # drop-and-create | create
+#              create-target: generated/test/db/create.sql
+#              drop-target: generated/test/db/drop.sql
+# Uncomment to run script to initialise content of DB
+#          sql-load-script-source: <some_place>/initdb.sql
 
 ---
 spring:
@@ -28,4 +47,4 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create  # create |
+      ddl-auto: none  # create | create-drop | validate | update | none

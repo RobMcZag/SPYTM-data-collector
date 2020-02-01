@@ -1,39 +1,56 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import org.junit.jupiter.api.Disabled;
+import com.robertozagni.SPYTM.data.collector.model.QuoteType;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class AlphaVantageDownloaderTest {
 
-    @Test @Disabled("Test not yet implemented.")
-    void mapAVDataToModel() {
-        // TODO Implement
+    @Mock private RestTemplate mockRestTemplate;
+
+    private AlphaVantageDownloader downloader;
+
+    @BeforeEach
+    void setUp() {
+        downloader = new AlphaVantageDownloader(mockRestTemplate);
     }
 
     @Test
-    void can_convert_from_trading_date_to_UTCTime() {
-        String tradingDate = "2020-01-23";
-        String timeZone = "US/Eastern";     // 5 hours after (+) UTC in Jan
-        LocalDateTime UTC_DateTime = AlphaVantageDownloader.toUTCTime(tradingDate, timeZone);
-        System.out.println("UTC date time is " + UTC_DateTime);
-        LocalDateTime expected = LocalDateTime.of(2020, 01, 23, 0 + 5, 0, 0);
-        assertEquals(expected, UTC_DateTime);
+    void return_empty_timeserie_when_null_is_passed_for_symbol() {
+        Map<String, TimeSerie> noDataExpected = downloader.download(QuoteType.DAILY, null);
+        assertNotNull(noDataExpected);
+        assertTrue(noDataExpected.isEmpty());
     }
 
     @Test
-    void can_convert_from_trading_time_to_UTCTime() {
-        String tradingDate = "2020-01-24 15:45:00";
-        String timeZone = "US/Eastern";     // 5 hours after (+) UTC in Jan
-        LocalDateTime UTC_DateTime = AlphaVantageDownloader.toUTCTime(tradingDate, timeZone);
-        System.out.println("UTC date time is " + UTC_DateTime);
-        LocalDateTime expected = LocalDateTime.of(2020, 01, 24, 15 + 5, 45, 0);
-        assertEquals(expected, UTC_DateTime);
+    void return_empty_timeserie_when_no_simbol_is_passed() {
+        Map<String, TimeSerie> noDataExpected = downloader.download(null, new ArrayList<>());
+        assertNotNull(noDataExpected);
+        assertTrue(noDataExpected.isEmpty());
+    }
+
+    @Test
+    void return_empty_timeserie_when_there_is_an_error_in_rest_call() {
+        when(mockRestTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
+                .thenThrow(new RestClientException("Sorry, I am just a mock ! I can not retrieve data for you"));
+
+        Map<String, TimeSerie> noDataExpected = downloader.download(QuoteType.DAILY, Collections.singletonList("MSFT"));
+        assertNotNull(noDataExpected);
+        assertTrue(noDataExpected.isEmpty());
     }
 
 }

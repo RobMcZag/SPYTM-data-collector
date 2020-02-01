@@ -1,5 +1,6 @@
 package com.robertozagni.SPYTM.data.collector;
 
+import com.robertozagni.SPYTM.data.collector.downloader.StockDataDownloaderRunner;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

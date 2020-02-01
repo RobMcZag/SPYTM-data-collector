@@ -1,29 +1,22 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.robertozagni.SPYTM.data.collector.model.DataSeries;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerieStockData;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
+@Component
 public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.collector.downloader.Downloader {
     // TODO collect APIKey from config, ideally from env (not typed into config or source)
     private static final String API_KEY = "SHGHQ9MPDSLJSKO5";
+
     private static final String BASE_URL = "https://www.alphavantage.co/query";
 
     private final RestTemplate restTemplate;
@@ -33,56 +26,38 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     }
 
     @Override
-    public Map<String, TimeSerie> download(DataSeries dataSeries, List<String> symbols) {
+    public Map<String, TimeSerie> download(QuoteType quoteType, List<String> symbols) {
         Map<String, TimeSerie> result = new HashMap<>();
+        if (symbols == null) { return result; }
+
         for (String symbol: symbols) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
-                    .queryParam("function", dataSeries.name())
+                    .queryParam("function", getFunctionName(quoteType))
                     .queryParam("symbol", symbol)
                     .queryParam("apikey", API_KEY);
             String url = builder.toUriString();
 
             log.debug("** Downloading " + url);
             try {
+
                 AVTimeSerie data = restTemplate.getForObject(url, AVTimeSerie.class);
                 assert data != null;
-                result.put(symbol, mapAVDataToModel(data));
+                if (data.getMetadata() == null) { continue; }   // We have nothing to say for this symbol
+                if (data.getAvQuotes() == null) { data.setAvQuotes(new HashMap<>()); }  // No quotes is fine
+                result.put(symbol, AVTimeSerie.toModel(data));
+
             } catch (RestClientException e) {
-                log.error("Error while attemptiong to download data from " + url, e);
+                log.error("Error while attempting to download data from " + url);
+                log.error(e.toString());
             }
         }
         return result;
 
     }
 
-    static public TimeSerie mapAVDataToModel(AVTimeSerie avdata) {
-        TimeSerieMetadata metaData = avdata.getMetadata().toTimeSerieMetadata();
-
-        Map<String, TimeSerieStockData> timeSerieStockData = new HashMap<>();
-        for (String tradingDate: avdata.getStockData().keySet()) {
-            AVStockData sd = avdata.getStockData().get(tradingDate);
-            sd.setDateTime(toUTCTime(tradingDate, metaData.getTimeZone()));
-            timeSerieStockData.put(tradingDate, sd.toTimeSerieStockData());
-        }
-        return new TimeSerie(metaData, timeSerieStockData);
-
-    }
-
-    static public LocalDateTime toUTCTime(String tradingDate, String timeZone) {
-        ZoneId originZone = ZoneId.of(timeZone);
-        LocalDateTime originLDT = parseTradingDate(tradingDate);
-        ZonedDateTime originZDT = ZonedDateTime.of(originLDT, originZone);
-        return originZDT.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-    }
-
-    private static LocalDateTime parseTradingDate(String tradingDate) {
-        String tradingDateTime;
-        if (tradingDate.contains(":")) {
-            tradingDateTime = tradingDate;
-        } else {
-            tradingDateTime = tradingDate + AVTimeSerie.Constants.AT_MIDNIGHT;
-        }
-        return LocalDateTime.parse(tradingDateTime, AVTimeSerie.Constants.DATE_TIME_FORMAT);
+    private String getFunctionName(QuoteType quoteType) {
+        // TODO make some more resilient mapper :)
+        return "TIME_SERIES_" + (quoteType==null ? "" : quoteType.name());
     }
 
 }

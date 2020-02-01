@@ -1,10 +1,10 @@
-package com.robertozagni.SPYTM.data.collector.model.alphavantage;
+package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
 import lombok.*;
 
-import static com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerieMetadata.Constants.*;
+import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata.Constants.*;
 
 @Data
 @AllArgsConstructor

@@ -1,9 +1,8 @@
 package com.robertozagni.SPYTM.data.collector;
 
-import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVStockData;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerie;
-import com.robertozagni.SPYTM.data.collector.model.alphavantage.AVTimeSerieMetadata;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDailyQuote;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +34,13 @@ class SpytmDataCollectorApplicationTests {
 		Mockito.when(mockTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
 				.thenReturn(emptyAVTimeSerie);
 
-		commandLineRunner.run("TIME_SERIES_DAILY_ADJUSTED", "MSFT", "AAPL");
+		commandLineRunner.run("DAILY_ADJUSTED", "MSFT", "AAPL");
 
 		verify(mockTemplate, times(2)).getForObject(anyString(), eq(AVTimeSerie.class));;
 	}
 
 	private AVTimeSerie makeEmptyTimeSerieData(){
-		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<String, AVStockData>());
+		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<String, AVDailyQuote>());
 	}
 
 	private AVTimeSerieMetadata makeTestTimeSerieMetadata() {
