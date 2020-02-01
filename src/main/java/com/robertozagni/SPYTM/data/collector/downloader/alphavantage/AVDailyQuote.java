@@ -17,7 +17,7 @@ import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDa
  *
  * This class has extra fields to be able to enrich the object and convert it to the Model representation.
  */
-@Data @AllArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor
 public class AVDailyQuote {
 
     /* Extra fields to be able to enrich the object and convert it to the Model representation */

@@ -1,11 +1,14 @@
 package com.robertozagni.SPYTM.data.collector.downloader;
 
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie;
+import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloaderTestHelper;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.client.RestTemplate;
@@ -17,13 +20,29 @@ import static org.mockito.Mockito.*;
 
 public class StockDataDownloaderRunnerTest {
     @Mock RestTemplate restTemplate;
-    @Mock DailyQuoteStorageService storageService;
-    StockDataDownloaderRunner downloaderRunner;
+    @Mock TimeSerieStorageService timeSerieStorageService;
+
+    private StockDataDownloaderRunner downloaderRunner;
 
     @BeforeEach
-    void initMocks() {
+    void init() {
         MockitoAnnotations.initMocks(this);
-        downloaderRunner = new StockDataDownloaderRunner(restTemplate, storageService);
+        downloaderRunner = new StockDataDownloaderRunner(restTemplate, timeSerieStorageService);
+    }
+
+    @Test
+    void download_and_storage_repository_are_invoked() throws Exception {
+        String[] args = {"MSFT", "AAPL", "XYZ"};
+        AVTimeSerie msftTimeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_AVTimeSerie();
+
+        when(restTemplate.getForObject(anyString(), eq(AVTimeSerie.class))).thenReturn(msftTimeSerie);
+        when(timeSerieStorageService.save(any(TimeSerie.class))).thenReturn(msftTimeSerie.toModel());
+
+        downloaderRunner.run(args);
+
+        verify(restTemplate, times(args.length)).getForObject(anyString(), eq(AVTimeSerie.class));
+        verify(timeSerieStorageService, times(args.length)).save(any(TimeSerie.class));
+
     }
 
     @Test

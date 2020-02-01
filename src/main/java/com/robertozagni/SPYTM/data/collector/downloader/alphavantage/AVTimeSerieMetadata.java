@@ -9,8 +9,7 @@ import lombok.*;
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata.JsonPropertyName.*;
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata.SeriesInfoText.*;
 
-@Data
-@AllArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor
 public class AVTimeSerieMetadata {
 
     @JsonProperty(value = SERIES_INFO) private String seriesInfo;

@@ -43,7 +43,7 @@ public class AlphaVantageDownloaderSpringTest {
 
     @Test
     void can_download_an_existing_serie() throws URISyntaxException, IOException {
-        File file = ResourceUtils.getFile("classpath:static/alphavantage/MSFT.json");
+        File file = ResourceUtils.getFile("classpath:static/alphavantage/MSFT_DAILY_ADJ.json");
         String content = new String(Files.readAllBytes(file.toPath()));
 
         String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=SHGHQ9MPDSLJSKO5";

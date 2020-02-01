@@ -2,7 +2,9 @@ package com.robertozagni.SPYTM.data.collector;
 
 import com.robertozagni.SPYTM.data.collector.downloader.StockDataDownloaderRunner;
 import com.robertozagni.SPYTM.data.collector.repository.DailyQuoteRepository;
+import com.robertozagni.SPYTM.data.collector.repository.TimeSerieMetadataRepository;
 import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,8 +29,14 @@ public class SpytmDataCollectorApplication {
 	}
 
 	@Bean
-	public CommandLineRunner createRunner(RestTemplate restTemplate, DailyQuoteRepository repository) throws Exception {
-		return new StockDataDownloaderRunner(restTemplate, new DailyQuoteStorageService(repository));
+	public CommandLineRunner createRunner(RestTemplate restTemplate,
+										  TimeSerieMetadataRepository timeSerieMetadataRepository,
+										  DailyQuoteRepository dailyQuoteRepository) {
+		return new StockDataDownloaderRunner(
+				restTemplate,
+				new TimeSerieStorageService(timeSerieMetadataRepository,
+						new DailyQuoteStorageService(dailyQuoteRepository))
+		);
 	}
 
 }

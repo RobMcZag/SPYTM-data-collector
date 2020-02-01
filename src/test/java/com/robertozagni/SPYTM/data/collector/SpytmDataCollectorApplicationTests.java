@@ -31,7 +31,7 @@ class SpytmDataCollectorApplicationTests {
 	@Test
 	void commandLineRunner_bean_exists_and_calls_correct_template() throws Exception {
 		AVTimeSerie emptyAVTimeSerie = makeEmptyTimeSerieData();
-		Mockito.when(mockTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
+		when(mockTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
 				.thenReturn(emptyAVTimeSerie);
 
 		commandLineRunner.run("DAILY_ADJUSTED", "MSFT", "AAPL");

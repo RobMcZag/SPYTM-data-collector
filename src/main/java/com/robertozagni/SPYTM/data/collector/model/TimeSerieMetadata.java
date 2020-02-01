@@ -18,4 +18,8 @@ public class TimeSerieMetadata {
     private String description;
     private String timeZone;
     private String lastRefreshed;
+
+    public TimeSerie.TimeSerieId getId() {
+        return new TimeSerie.TimeSerieId(getProvider(), getQuotetype(), getSymbol());
+    }
 }

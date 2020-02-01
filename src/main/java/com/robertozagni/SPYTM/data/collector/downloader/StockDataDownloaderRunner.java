@@ -5,6 +5,7 @@ import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,11 +25,12 @@ import java.util.Optional;
 public class StockDataDownloaderRunner implements CommandLineRunner {
 
     private final RestTemplate restTemplate;
-    private final DailyQuoteStorageService dailyQuoteStorageService;
+    // private final DailyQuoteStorageService dailyQuoteStorageService;
+    private final TimeSerieStorageService timeSerieStorageService;
 
-    public StockDataDownloaderRunner(RestTemplate restTemplate, DailyQuoteStorageService dailyQuoteStorageService) {
+    public StockDataDownloaderRunner(RestTemplate restTemplate, TimeSerieStorageService timeSerieStorageService) {
         this.restTemplate = restTemplate;
-        this.dailyQuoteStorageService = dailyQuoteStorageService;
+        this.timeSerieStorageService = timeSerieStorageService;
     }
 
     /**
@@ -44,23 +46,31 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
     public void run(String... args) throws Exception {
         DownloadConfig cfg = parseArgs(args);
 
-        Map<String, TimeSerie> timeSeries;
+        Map<String, TimeSerie> timeSeries = downloadQuotes(cfg);
+        saveTimeSeries(timeSeries);
+    }
 
+    private void saveTimeSeries(Map<String, TimeSerie> timeSeries) {
+        for (TimeSerie ts:timeSeries.values()) {
+            TimeSerie savedQuotesTS = timeSerieStorageService.save(ts);
+            log.info(String.format("Saved %d %s quotes for %s from %s!",
+                    savedQuotesTS.getData().size(),
+                    savedQuotesTS.getMetadata().getQuotetype(),
+                    savedQuotesTS.getMetadata().getSymbol(),
+                    savedQuotesTS.getMetadata().getProvider() ));
+        }
+    }
+
+    private Map<String, TimeSerie> downloadQuotes(DownloadConfig cfg) {
         switch (cfg.quoteProvider) {
             case TEST_PROVIDER:
                 throw new UnsupportedOperationException("No test service defined at this time!");
 
             case APLPHA_VANTAGE:
-            default:
-                timeSeries = new AlphaVantageDownloader(restTemplate).download(cfg.quoteType, cfg.symbols);
-                break;
-        }
+                return new AlphaVantageDownloader(restTemplate).download(cfg.quoteType, cfg.symbols);
 
-        for (String symbol:timeSeries.keySet()) {
-            TimeSerie ts = timeSeries.get(symbol);
-            logDataInfo(ts);
-            TimeSerie savedQuotesTS = dailyQuoteStorageService.saveAllQuotes(ts);
-            log.info(String.format("Saved %d quotes!", savedQuotesTS.getData().size()));
+            default:
+                throw new IllegalArgumentException("Requested unknown quote provider:" + cfg.quoteProvider);
         }
     }
 
@@ -69,19 +79,17 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
         QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
         List<String> symbols = new ArrayList<>();
 
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-            if (i < 2) {
-                try {
-                    quoteType = QuoteType.valueOf(arg);
-                    continue;
-                } catch (IllegalArgumentException ignored) { }   // Not a serie type
-                try {
-                    quoteProvider = QuoteProvider.valueOf(arg);
-                    continue;
-                } catch (IllegalArgumentException ignored) { }   // Not a provider
-            }
-            symbols.add(arg);
+        for (String arg: args) {
+            try {
+                quoteType = QuoteType.valueOf(arg);
+                continue;
+            } catch (IllegalArgumentException ignored) { }   // Not a serie type
+            try {
+                quoteProvider = QuoteProvider.valueOf(arg);
+                continue;
+            } catch (IllegalArgumentException ignored) { }   // Not a provider
+
+            symbols.add(arg);                                // Then it's a symbol ! :)
         }
         return new DownloadConfig(quoteType, quoteProvider, symbols);
     }

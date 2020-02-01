@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie.Constants.*;
 
-@Data @AllArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor
 public class AVTimeSerie {
 
     @JsonProperty(value = META_DATA) private AVTimeSerieMetadata metadata;

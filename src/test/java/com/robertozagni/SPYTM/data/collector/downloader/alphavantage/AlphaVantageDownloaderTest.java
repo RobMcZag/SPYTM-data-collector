@@ -10,9 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +28,39 @@ class AlphaVantageDownloaderTest {
         downloader = new AlphaVantageDownloader(mockRestTemplate);
     }
 
+    @Test
+    void process_correctly_one_time_serie() throws IOException {
+        List<String> msft = Collections.singletonList("MSFT");
+        AVTimeSerie msftAVTimeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_AVTimeSerie();
+
+        when(mockRestTemplate.getForObject(contains("&symbol=MSFT&"), eq(AVTimeSerie.class))).thenReturn(msftAVTimeSerie);
+
+        Map<String, TimeSerie> timeSerieMap = downloader.download(QuoteType.DAILY_ADJUSTED, msft);
+
+        verify(mockRestTemplate, times(msft.size())).getForObject(anyString(), eq(AVTimeSerie.class));
+
+        assertEquals(1, timeSerieMap.keySet().size());
+        assertTrue(timeSerieMap.keySet().contains("MSFT"));
+        assertEquals(timeSerieMap.get("MSFT"), msftAVTimeSerie.toModel());
+    }
+
+    @Test
+    void process_correctly_with_missing_time_serie() throws IOException {
+        List<String> symbols = Arrays.asList("ABCX", "MSFT", "XYZ");
+        AVTimeSerie msftAVTimeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_AVTimeSerie();
+        AVTimeSerie emptyAVTimeSerie = new AVTimeSerie();
+
+        when(mockRestTemplate.getForObject(anyString(), eq(AVTimeSerie.class))).thenReturn(emptyAVTimeSerie);
+        when(mockRestTemplate.getForObject(contains("&symbol=MSFT&"), eq(AVTimeSerie.class))).thenReturn(msftAVTimeSerie);
+
+        Map<String, TimeSerie> timeSerieMap = downloader.download(QuoteType.DAILY_ADJUSTED, symbols);
+
+        verify(mockRestTemplate, times(symbols.size())).getForObject(anyString(), eq(AVTimeSerie.class));
+
+        assertEquals(1, timeSerieMap.keySet().size());
+        assertTrue(timeSerieMap.keySet().contains("MSFT"));
+        assertEquals(timeSerieMap.get("MSFT"), msftAVTimeSerie.toModel());
+    }
     @Test
     void return_empty_timeserie_when_null_is_passed_for_symbol() {
         Map<String, TimeSerie> noDataExpected = downloader.download(QuoteType.DAILY, null);
