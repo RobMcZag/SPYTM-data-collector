@@ -4,9 +4,11 @@ import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantag
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +22,13 @@ import java.util.Optional;
  */
 @Slf4j
 public class StockDataDownloaderRunner implements CommandLineRunner {
-    private static final String timeSerie = "TIME_SERIES_DAILY_ADJUSTED";
 
-    private final AlphaVantageDownloader alphaVantageDownloader;
+    private final RestTemplate restTemplate;
+    private final DailyQuoteStorageService dailyQuoteStorageService;
 
-    public StockDataDownloaderRunner(AlphaVantageDownloader alphaVantageDownloader) {
-        this.alphaVantageDownloader = alphaVantageDownloader;
+    public StockDataDownloaderRunner(RestTemplate restTemplate, DailyQuoteStorageService dailyQuoteStorageService) {
+        this.restTemplate = restTemplate;
+        this.dailyQuoteStorageService = dailyQuoteStorageService;
     }
 
     /**
@@ -39,6 +42,29 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
+        DownloadConfig cfg = parseArgs(args);
+
+        Map<String, TimeSerie> timeSeries;
+
+        switch (cfg.quoteProvider) {
+            case TEST_PROVIDER:
+                throw new UnsupportedOperationException("No test service defined at this time!");
+
+            case APLPHA_VANTAGE:
+            default:
+                timeSeries = new AlphaVantageDownloader(restTemplate).download(cfg.quoteType, cfg.symbols);
+                break;
+        }
+
+        for (String symbol:timeSeries.keySet()) {
+            TimeSerie ts = timeSeries.get(symbol);
+            logDataInfo(ts);
+            TimeSerie savedQuotesTS = dailyQuoteStorageService.saveAllQuotes(ts);
+            log.info(String.format("Saved %d quotes!", savedQuotesTS.getData().size()));
+        }
+    }
+
+    DownloadConfig parseArgs(String[] args) {
         QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
         QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
         List<String> symbols = new ArrayList<>();
@@ -57,21 +83,7 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
             }
             symbols.add(arg);
         }
-
-
-        switch (quoteProvider) {
-            case TEST_PROVIDER:
-                throw new UnsupportedOperationException("No test service defined at this time");
-
-            case APLPHA_VANTAGE:
-            default:
-                Map<String, TimeSerie> timeSeries = alphaVantageDownloader.download(quoteType, symbols);
-                for (String symbol:timeSeries.keySet()) {
-                    logDataInfo(timeSeries.get(symbol));
-                }
-                break;
-        }
-
+        return new DownloadConfig(quoteType, quoteProvider, symbols);
     }
 
     private void logDataInfo(TimeSerie ts) {
@@ -81,10 +93,17 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
         log.info(ts.getMetadata().getLastRefreshed() + " - " + ts.getMetadata().getTimeZone());
         log.info(ts.getMetadata().getOutputSize());
         log.info("--");
-        log.info("Rows of stock data: " + String.valueOf(ts.getData().size()));
+        log.info("Rows of stock data: " + ts.getData().size());
         Optional<String> firstDate = ts.getData().keySet().stream().findFirst();
         firstDate.ifPresent(s -> log.info("First day: " + s + " ==> " + ts.getData().get(s)));
         log.info("=========");
+    }
+
+    @AllArgsConstructor
+     static class DownloadConfig {
+        QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
+        QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
+        List<String> symbols = new ArrayList<>();
     }
 
 }
