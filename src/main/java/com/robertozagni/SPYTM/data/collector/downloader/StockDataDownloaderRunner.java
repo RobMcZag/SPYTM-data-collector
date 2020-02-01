@@ -88,10 +88,9 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
 
     private void logDataInfo(TimeSerie ts) {
         log.info("=========");
-        log.info(ts.getMetadata().getSeriesInfo());
         log.info(ts.getMetadata().getSymbol());
+        log.info(ts.getMetadata().getDescription());
         log.info(ts.getMetadata().getLastRefreshed() + " - " + ts.getMetadata().getTimeZone());
-        log.info(ts.getMetadata().getOutputSize());
         log.info("--");
         log.info("Rows of stock data: " + ts.getData().size());
         Optional<String> firstDate = ts.getData().keySet().stream().findFirst();

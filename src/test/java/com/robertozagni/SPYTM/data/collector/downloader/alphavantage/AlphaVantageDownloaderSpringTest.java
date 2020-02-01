@@ -1,18 +1,13 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.robertozagni.SPYTM.data.collector.SpytmDataCollectorApplication;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.ResourceUtils;
@@ -72,10 +67,9 @@ public class AlphaVantageDownloaderSpringTest {
 //                    "4. Output Size": "Compact",
 //                    "5. Time Zone": "US/Eastern"
 //        },
-        assertEquals(msft.getMetadata().getSeriesInfo(), "Daily Time Series with Splits and Dividend Events");
         assertEquals(msft.getMetadata().getSymbol(), "MSFT");
+        assertEquals(msft.getMetadata().getDescription(), "Daily Time Series with Splits and Dividend Events");
         assertEquals(msft.getMetadata().getLastRefreshed(), "2020-01-23 13:02:11");
-        assertEquals(msft.getMetadata().getOutputSize(), "Compact");
         assertEquals(msft.getMetadata().getTimeZone(), "US/Eastern");
 
         assertEquals(msft.getData().size(), 100);
