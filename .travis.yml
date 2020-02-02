@@ -15,9 +15,9 @@ addons:
 
 # Create the User, DB and assign DB ownership to User
 before_script:
-  - psql -c "CREATE USER spytm_test_user PASSWORD '1234-test-PW' ;" -U postgres
-  - psql -c "CREATE DATABASE spytm_test_db ;" -U postgres
-  - psql -c "ALTER DATABASE spytm_test_db OWNER TO spytm_test_user ;" -U postgres
+  - psql postgres -c "CREATE USER spytm_test_user PASSWORD '1234-test-PW' ;" -U postgres
+  - psql postgres -c "CREATE DATABASE spytm_test_db ;" -U postgres
+  - psql postgres -c "ALTER DATABASE spytm_test_db OWNER TO spytm_test_user ;" -U postgres
 
 # Gradle specific Caching #
 # To avoid uploading the Gradle cache after every build
