@@ -25,7 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.flywaydb:flyway-core'
     compileOnly 'org.projectlombok:lombok'
-    // runtimeOnly 'com.h2database:h2'             // In memory DB, maybe for Tests
+    runtimeOnly 'com.h2database:h2'             // In memory DB, maybe for Tests
     runtimeOnly 'org.postgresql:postgresql'     // Postgress DB
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
