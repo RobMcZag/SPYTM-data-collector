@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/RobMcZag/SPYTM-data-collector.svg?branch=master)](https://travis-ci.com/RobMcZag/SPYTM-data-collector)
+
 # SPYTM-data-collector
 This small Spring Boot application will collect stock data from different available 
 data sources and store it (in DB and/or in CSV files) for further use.
