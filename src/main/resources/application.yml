@@ -5,6 +5,30 @@ spring:
 ---
 spring:
   profiles: test
+  h2.console.enabled: true    # http://localhost:8080/h2-console
+  datasource:
+    url: jdbc:h2:mem:spytm_test_db    # Schema defined below in properties.hibernate.default_schema
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+    initialization-mode: always   # explicitly enable (even for this embedded db)
+  flyway:
+    locations: classpath:/db/migration
+    schemas: spytm    # schema1,schema2,schema3
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate  # validate as we use Flyway // create | create-drop | validate | update | none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        default_schema: spytm     # Define schema to use
+      javax:
+        persistence:    # Eventual javax.persistence properties
+
+---
+spring:
+  profiles: test_pg
   datasource:
     url: jdbc:postgresql://localhost:5432/spytm_test_db    # Schema defined below in properties.hibernate.default_schema
     username: spytm_test_user
