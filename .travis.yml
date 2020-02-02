@@ -1,0 +1,32 @@
+# Travis CI Java documentation can be found in:
+# https://docs.travis-ci.com/user/languages/java/
+
+# This enables the 'defaults' to test java applications:
+language: java
+  # Will execute following steps
+  # gradle assemble
+  # gradle check
+
+# Setup a postgres DB and specify PG version
+services:
+  - postgresql
+addons:
+  postgresql: "12.1"
+
+# Create the User, DB and assign DB ownership to User
+before_script:
+  - psql -c "CREATE USER spytm_test_user PASSWORD '1234-test-PW' ;" -U postgres
+  - psql -c "CREATE DATABASE spytm_test_db ;" -U postgres
+  - psql -c "ALTER DATABASE spytm_test_db OWNER TO spytm_test_user ;" -U postgres
+
+# Gradle specific Caching #
+# To avoid uploading the Gradle cache after every build
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+
