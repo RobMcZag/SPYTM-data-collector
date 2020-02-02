@@ -11,7 +11,7 @@ language: java
 services:
   - postgresql
 addons:
-  postgresql: "12.1"
+  postgresql: "12"
 
 # Create the User, DB and assign DB ownership to User
 before_script:
