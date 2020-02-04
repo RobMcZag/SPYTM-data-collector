@@ -1,15 +1,11 @@
-# Package for Java based Flyway migrations
+# PRODUCTION -JAVA based- Flyway migrations
 
-This package is set up to contain Flyway database migration written in Java.
+**This folder is for _JAVA Flyway database migrations_ to be applied in PRODUCTION**.
 
-Typically java based migrations are used to perform data migration tasks tha require 
-specific checks or data manipulation that are not simple to perform in SQL.  
+The SQL based Flyway migrations for production are in `resources/db/migration`.
 
-The SQL based Flyway migration are in resources/db/migration.
+Go to [test migrations README](../../../../../src/test/resources/db/migration/README.md)
+for more info on the test and release process for DB migrations.
 
-More info on Java migrations: https://flywaydb.org/getstarted/java
-
-## [How to name java migrations](https://flywaydb.org/documentation/migrations#java-based-migrations)
-![Naming Flyway JAVA migrations](Naming_Flyway_JAVA_migration.png)
-
-
+Go to [production SQL migrations README](../../../resources/db/migration/README.md)
+for an explanation about **Why JAVA or SQL DB migrations**.

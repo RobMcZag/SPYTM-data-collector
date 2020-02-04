@@ -2,47 +2,53 @@
 
 # SPYTM-data-collector
 
+This is just a small Spring Boot application I wrote to brush off some rust from my hands-on 
+coding skills and to somehow organise the collection of data for my investment activities.  
 For the courious... SPYTM stands for SPY Trading Model.
 
-This small Spring Boot application will collect stock data from different available 
+The basic idea of this application is to collect stock data from different available 
 data sources and store it for further use.
 
-The use of data is intended to train a model, written in Python, to predict future
-securities prices from the past ones, using Linear Regression.
+The initial intended use of the downloaded data is to train a model, written in Python, 
+to predict future SPY prices from other price time-series, using Linear Regression.
 One remarkably good relationships exists between the daily closing / half-day price 
-of Asian / European markets and the US markets. 
+of Asian / European markets and the US markets as represented by SPY.  
 The basic idea is to exploit the fact that the Asian / European markets provide their
 closing / half-day time early enough to bet on the daily outcome of the US markets.     
 
-## Business featues
-* The data is collected through API calls, receiving JSON encoded data.
-* The data model of the application is independent of each provider's format.
-  * For each provider it is nicer and easier to use a specific data model 
-  to support download and deserialisation of data as is sent over the wire.
-  * Each provider's downloader can easily use its own data model 
-  to deliver downloaded data to the rest of the app in the general data model.
+The python regression model will be available in another repo. ATM it is still unpublished. 
 
-The python model is available in another -still unpublished- repo.
+## Main featues
+* The data is collected through API calls, receiving JSON encoded data.
+* The data can be downloaded incrementally, adding what is new or changed.
+* The data model of the application is independent of each provider's format.
+  * For each provider it is nice and easy to use a specific data model.   
+  This supports easy download and deserialisation of data as sent over the wire.
+  * Each provider's downloader keeps its own model private.   
+  It delivers data to the rest of the app in the app's canonical data model.
 
 ### Future ideas
 * data pipeline to deliver downloaded data to a cloud data lake
+* export data to CSV in YahooFinance format
 * minimal web interface to explore the downloaded content 
 * rest API to access data from the local DB
 * reporting and data sharing on top of the cloud data lake
-* Export data to CSV in YahooFinance format
  
 
 ## Unsorted techies things :)
 * Build is done with Gradle and checked upon push and merge with Travis CI.  
-The travis build script includes commands to create the PG Database and user.  
 * Data is stored in a configurable DB - in memory H2 by default;  
 Postgress is already configured, just enable the `test_pg` profile.  
-You can use the commands from Travis build to create the user and DB.
-* Database evolution is managed through Flyway migrations (SQL or Java)
+* The Travis build script `.travis.yml` includes commands to create the PG Database and user.    
+You can use those commands to create your local DB and app user.
+* Database evolution is managed through Flyway migrations (SQL or Java)  
+Get more in the [Flyway migrations README](main/resources/db/migration/README.md)
 * Tests are nicely organised :)
-  * unit tests are separated from integration tests and can be run independently  
-  * both unit and integration tests are run upon build and in CI
-  * a test source-set library holds static test data and helpers to use them  
+  * Unit tests are separated from Integration tests and each set can be run independently.  
+  The default if you just run the `test` task is to only run Unit tests.
+  * both Unit and Integration tests are run upon build and in CI
+  * a test source-set library holds static test data and helpers to make available 
+  that data to all the tests.  
 
 
 # Running the project
