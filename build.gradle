@@ -59,6 +59,7 @@ integrationTest {   // Runs at least onces a day
     inputs.property "integration.date", LocalDate.now()
 }
 
+integrationTest.shouldRunAfter test     // Fail fast on Unit tests, eventually.
 check.dependsOn integrationTest         // To have integrationTests run during the build
 
 flyway {    // To use Flyway targets without running Spring Boot
