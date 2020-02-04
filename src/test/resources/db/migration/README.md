@@ -1,4 +1,4 @@
-# Resource folder for TEST SQL based Flyway migrations
+# TEST -SQL based- Flyway migrations
 
 **This folder is for _SQL Flyway DB migrations_ to be applied only in tests**.
 

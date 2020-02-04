@@ -1,4 +1,4 @@
-# Package for Java based Flyway migrations
+# TEST -Java based- Flyway migrations
 
 **This folder is for _JAVA Flyway DB migrations_ to be applied only in tests**.
 
