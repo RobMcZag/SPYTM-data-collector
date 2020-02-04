@@ -42,7 +42,7 @@ Postgress is already configured, just enable the `test_pg` profile.
 * The Travis build script `.travis.yml` includes commands to create the PG Database and user.    
 You can use those commands to create your local DB and app user.
 * Database evolution is managed through Flyway migrations (SQL or Java)  
-Get more in the [Flyway migrations README](main/resources/db/migration/README.md)
+Get more in the [Flyway migrations README](src/main/resources/db/migration/README.md)
 * Tests are nicely organised :)
   * Unit tests are separated from Integration tests and each set can be run independently.  
   The default if you just run the `test` task is to only run Unit tests.
