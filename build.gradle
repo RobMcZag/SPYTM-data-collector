@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'com.h2database:h2'             // H2 in memory DB - for local running and tests
     runtimeOnly 'org.postgresql:postgresql'     // Postgress DB - for Prod and pre-prod Tests
+    runtimeOnly 'net.snowflake:snowflake-jdbc'  // Snowflake data lake
 
     // testHelpersCompileOnly sourceSets.main.output
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
