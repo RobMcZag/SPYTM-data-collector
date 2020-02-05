@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/RobMcZag/SPYTM-data-collector.svg?branch=master)](https://travis-ci.com/RobMcZag/SPYTM-data-collector)
+[![GPL3 License](https://img.shields.io/badge/license-GPL3-green)](LICENSE)
 
 # SPYTM-data-collector
 

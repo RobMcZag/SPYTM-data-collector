@@ -4,11 +4,13 @@ import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantag
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
+import com.robertozagni.SPYTM.data.collector.datalake.service.SnowflakeStorageService;
 import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -22,15 +24,21 @@ import java.util.Optional;
  * app [time-serie] [symbols...]
  */
 @Slf4j
+@Service
 public class StockDataDownloaderRunner implements CommandLineRunner {
 
     private final RestTemplate restTemplate;
-    // private final DailyQuoteStorageService dailyQuoteStorageService;
     private final TimeSerieStorageService timeSerieStorageService;
+    private SnowflakeStorageService snowflakeStorageService;
 
-    public StockDataDownloaderRunner(RestTemplate restTemplate, TimeSerieStorageService timeSerieStorageService) {
+    @Autowired
+    public StockDataDownloaderRunner(
+            RestTemplate restTemplate,
+            TimeSerieStorageService timeSerieStorageService,
+            SnowflakeStorageService snowflakeStorageService) {
         this.restTemplate = restTemplate;
         this.timeSerieStorageService = timeSerieStorageService;
+        this.snowflakeStorageService = snowflakeStorageService;
     }
 
     /**
@@ -48,6 +56,9 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
 
         Map<String, TimeSerie> timeSeries = downloadQuotes(cfg);
         saveTimeSeries(timeSeries);
+        // TODO send timeserie to SF - something like below
+        // snowflakeStorageService.save(timeSeries);
+         snowflakeStorageService.checkConnection();
     }
 
     private void saveTimeSeries(Map<String, TimeSerie> timeSeries) {
