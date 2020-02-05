@@ -1,18 +1,19 @@
 package com.robertozagni.SPYTM.data.collector;
 
-import com.robertozagni.SPYTM.data.collector.downloader.StockDataDownloaderRunner;
-import com.robertozagni.SPYTM.data.collector.repository.DailyQuoteRepository;
-import com.robertozagni.SPYTM.data.collector.repository.TimeSerieMetadataRepository;
-import com.robertozagni.SPYTM.data.collector.service.DailyQuoteStorageService;
-import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
-import org.springframework.boot.CommandLineRunner;
+import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
+
+import javax.sql.DataSource;
 
 @SpringBootApplication
 @EnableJpaRepositories
@@ -28,15 +29,20 @@ public class SpytmDataCollectorApplication {
 		return builder.build();
 	}
 
-	@Bean
-	public CommandLineRunner createRunner(RestTemplate restTemplate,
-										  TimeSerieMetadataRepository timeSerieMetadataRepository,
-										  DailyQuoteRepository dailyQuoteRepository) {
-		return new StockDataDownloaderRunner(
-				restTemplate,
-				new TimeSerieStorageService(timeSerieMetadataRepository,
-						new DailyQuoteStorageService(dailyQuoteRepository))
-		);
+	@Primary
+	@Bean(name = "defaultDatasourceProperties")
+	@ConfigurationProperties("spring.datasource")
+	public DataSourceProperties defaultDatasourceProperties() {
+		return new DataSourceProperties();
+	}
+
+	@Primary
+	@Bean(name = "defaultDatasource")
+	public DataSource localDbDatasource(@Qualifier("defaultDatasourceProperties") DataSourceProperties defaultDataSourceProperties) {
+		return defaultDataSourceProperties
+				.initializeDataSourceBuilder()
+				.type(HikariDataSource.class)
+				.build();
 	}
 
 }

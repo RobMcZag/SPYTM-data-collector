@@ -2,6 +2,18 @@ spring:
   profiles:
     active: test
 
+datalake:
+  url: jdbc:snowflake://wr04231.eu-west-1.snowflakecomputing.com
+  account: wr04231
+  region: eu-west-1
+  username: testappuser
+  password: testAppUserAcc0unt
+  role: SPYTMLAKE_USER_ROLE
+  databaseName: SPYTMLAKE_TEST
+  schema:
+  warehouse:
+  # initialization-mode: never   # explicitly disable for Snowflake
+
 ---
 spring:
   profiles: test
