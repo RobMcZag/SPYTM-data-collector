@@ -4,7 +4,6 @@ plugins {
     id 'java'
     id "org.flywaydb.flyway" version "6.2.0"
     id 'org.unbroken-dome.test-sets' version '2.2.1'
-    id 'idea'   // To be able to set testDirs as testSourceSets
 }
 
 group 'com.robertozagni'
@@ -30,53 +29,48 @@ testSets {
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+    compileOnly { extendsFrom annotationProcessor }
 }
 
 dependencies {
+    annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     compileOnly 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.flywaydb:flyway-core'
+    implementation group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.11.1'
     runtimeOnly 'com.h2database:h2'             // H2 in memory DB - for local running and tests
     runtimeOnly 'org.postgresql:postgresql'     // Postgress DB - for Prod and pre-prod Tests
-    runtimeOnly 'net.snowflake:snowflake-jdbc'  // Snowflake data lake
 
     // testHelpersCompileOnly sourceSets.main.output
+
+    testHelpersImplementation  sourceSets.main.output
+    testHelpersImplementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation sourceSets.testHelpers.output
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testHelpersImplementation 'org.springframework.boot:spring-boot-starter-web'
+
+    integrationTestImplementation   sourceSets.testHelpers.output
+
 }
 
 tasks.withType(Test) {  // make all Test sets use JUnit 5 - 'test' would have used it for unit tests only :)
     useJUnitPlatform()
 }
 
-integrationTest {   // Runs at least onces a day
-    inputs.property "integration.date", LocalDate.now()
+integrationTest {
+    inputs.property "integration.date", LocalDate.now()     // Runs at least onces a day, as input is different
+    shouldRunAfter(test)
 }
 
-integrationTest.shouldRunAfter test     // Fail fast on Unit tests, eventually.
 check.dependsOn integrationTest         // To have integrationTests run during the build
 
-flyway {    // To use Flyway targets without running Spring Boot
+flyway {    // To use Flyway targets from Gradle without running Spring Boot
     url = 'jdbc:postgresql://localhost:5432/spytm_test_db'
     user = 'spytm_test_user'
     password = '1234-test-PW'
     schemas = ['spytm']
-    // placeholders = ['name': 'val',]
-}
-
-idea {
-    module {
-        testSourceDirs += project.sourceSets.testHelpers.java.srcDirs
-        testSourceDirs += project.sourceSets.testHelpers.resources.srcDirs
-
-        testSourceDirs += project.sourceSets.integrationTest.java.srcDirs
-        testSourceDirs += project.sourceSets.integrationTest.resources.srcDirs
-    }
 }
