@@ -105,18 +105,6 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
         return new DownloadConfig(quoteType, quoteProvider, symbols);
     }
 
-    private void logDataInfo(TimeSerie ts) {
-        log.info("=========");
-        log.info(ts.getMetadata().getSymbol());
-        log.info(ts.getMetadata().getDescription());
-        log.info(ts.getMetadata().getLastRefreshed() + " - " + ts.getMetadata().getTimeZone());
-        log.info("--");
-        log.info("Rows of stock data: " + ts.getData().size());
-        Optional<String> firstDate = ts.getData().keySet().stream().findFirst();
-        firstDate.ifPresent(s -> log.info("First day: " + s + " ==> " + ts.getData().get(s)));
-        log.info("=========");
-    }
-
     @AllArgsConstructor
      static class DownloadConfig {
         QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
