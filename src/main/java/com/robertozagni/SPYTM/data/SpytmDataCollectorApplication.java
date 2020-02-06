@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;

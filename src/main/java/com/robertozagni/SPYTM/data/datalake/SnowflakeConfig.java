@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector.datalake;
+package com.robertozagni.SPYTM.data.datalake;
 
 import com.zaxxer.hikari.HikariDataSource;
 import net.snowflake.client.jdbc.SnowflakeBasicDataSource;

@@ -5,7 +5,7 @@ import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantag
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.datalake.service.SnowflakeStorageService;
+import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
 import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

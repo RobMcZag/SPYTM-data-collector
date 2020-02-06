@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector.datalake;
+package com.robertozagni.SPYTM.data.datalake;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
