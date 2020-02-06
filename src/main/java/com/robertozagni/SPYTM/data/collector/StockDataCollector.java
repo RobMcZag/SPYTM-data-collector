@@ -1,42 +1,48 @@
-package com.robertozagni.SPYTM.data.collector.downloader;
+package com.robertozagni.SPYTM.data.collector;
 
-import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.service.StockDataDownloaderService;
 import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
 import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
- * Downloads the required time-serie for the required symbols.
+ * Simple runner to download, store locally and push to the data lake quote data for some stock symbols.
  *
- * app [time-serie] [symbols...]
+ * Downloads the requested time-serie for the requested symbols.
+ * Stores the downloaded TimeSeries in the local DB.
+ * Pushes the data to the data lake.
+ *
+ * command line arguments: [QuoteType] [QuoteProvider] Symbol1 Symbol2 ...
+ * All passed arguments are parsed to check if they identify a QuoteType or QuoteProvider to use.
+ * All arguments not identifying a QuoteType or QuoteProvider is considered a security symbol to download data for.
+ *
  */
 @Slf4j
 @Service
-public class StockDataDownloaderRunner implements CommandLineRunner {
+public class StockDataCollector implements CommandLineRunner {
 
-    private final RestTemplate restTemplate;
+    private final StockDataDownloaderService stockDataDownloaderService;
     private final TimeSerieStorageService timeSerieStorageService;
     private SnowflakeStorageService snowflakeStorageService;
 
     @Autowired
-    public StockDataDownloaderRunner(
-            RestTemplate restTemplate,
+    public StockDataCollector(
+            StockDataDownloaderService stockDataDownloaderService,
             TimeSerieStorageService timeSerieStorageService,
             SnowflakeStorageService snowflakeStorageService) {
-        this.restTemplate = restTemplate;
+        this.stockDataDownloaderService = stockDataDownloaderService;
         this.timeSerieStorageService = timeSerieStorageService;
         this.snowflakeStorageService = snowflakeStorageService;
     }
@@ -48,46 +54,41 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
      * will retrieve "daily adjusted data" for Microsoft, Apple and Boeing <BR>
      * TIME_SERIES_DAILY_ADJUSTED is the name of the desired data series, that also picks the data provider; <BR>
      * MSFT AAPL BA exemplify one or more stock symbols;
-     * @throws Exception on error
      */
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
+
         DownloadConfig cfg = parseArgs(args);
 
-        Map<String, TimeSerie> timeSeries = downloadQuotes(cfg);
-        saveTimeSeries(timeSeries);
+        Map<String, TimeSerie> timeSeries = stockDataDownloaderService.downloadQuotes(cfg);
+        timeSeries.values().forEach(
+                (TimeSerie serie) ->
+                    log.info(String.format("Downloaded %d %s quotes for %s from %s!",
+                            serie.getData().size(),
+                            serie.getMetadata().getQuotetype(),
+                            serie.getMetadata().getSymbol(),
+                            serie.getMetadata().getProvider()) )
+        );
+
+        timeSeries.values().forEach(
+                (TimeSerie serie) -> {
+                    timeSerieStorageService.save(serie);
+                    log.info(String.format("Downloaded %d %s quotes for %s from %s!",
+                            serie.getData().size(),
+                            serie.getMetadata().getQuotetype(),
+                            serie.getMetadata().getSymbol(),
+                            serie.getMetadata().getProvider()) );
+                }
+        );
+
         // TODO send timeserie to SF - something like below
         // snowflakeStorageService.save(timeSeries);
          snowflakeStorageService.checkConnection();
     }
 
-    private void saveTimeSeries(Map<String, TimeSerie> timeSeries) {
-        for (TimeSerie ts:timeSeries.values()) {
-            TimeSerie savedQuotesTS = timeSerieStorageService.save(ts);
-            log.info(String.format("Saved %d %s quotes for %s from %s!",
-                    savedQuotesTS.getData().size(),
-                    savedQuotesTS.getMetadata().getQuotetype(),
-                    savedQuotesTS.getMetadata().getSymbol(),
-                    savedQuotesTS.getMetadata().getProvider() ));
-        }
-    }
-
-    private Map<String, TimeSerie> downloadQuotes(DownloadConfig cfg) {
-        switch (cfg.quoteProvider) {
-            case TEST_PROVIDER:
-                throw new UnsupportedOperationException("No test service defined at this time!");
-
-            case APLPHA_VANTAGE:
-                return new AlphaVantageDownloader(restTemplate).download(cfg.quoteType, cfg.symbols);
-
-            default:
-                throw new IllegalArgumentException("Requested unknown quote provider:" + cfg.quoteProvider);
-        }
-    }
-
     DownloadConfig parseArgs(String[] args) {
-        QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
-        QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
+        QuoteType quoteType = stockDataDownloaderService.getDefaultQuoteType();
+        QuoteProvider quoteProvider = stockDataDownloaderService.getDefaultQuoteProvider();
         List<String> symbols = new ArrayList<>();
 
         for (String arg: args) {
@@ -105,11 +106,11 @@ public class StockDataDownloaderRunner implements CommandLineRunner {
         return new DownloadConfig(quoteType, quoteProvider, symbols);
     }
 
-    @AllArgsConstructor
-     static class DownloadConfig {
-        QuoteType quoteType = QuoteType.DAILY_ADJUSTED;
-        QuoteProvider quoteProvider = QuoteProvider.APLPHA_VANTAGE;
-        List<String> symbols = new ArrayList<>();
+    @AllArgsConstructor @Getter
+    public static class DownloadConfig {
+        private QuoteType quoteType;
+        private QuoteProvider quoteProvider;
+        List<String> symbols;
     }
 
 }
