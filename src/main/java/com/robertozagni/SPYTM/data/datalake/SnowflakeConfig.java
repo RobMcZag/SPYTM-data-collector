@@ -39,6 +39,13 @@ public class SnowflakeConfig {
                 ("The Snowflake driver is not loadable.", snowflakeProperties);
 
     }
+
+    /**
+     * Creates an Hikari datasource for Snowflake, mostly to test how it would work.
+     * @param snowflakeProperties the properties container bean with the info to use to create the datasource.
+     * @return a newly allocated Snowflake data source
+     * @throws SnowflakeProperties.SnowflakeDataSourceCreationException if the datasource can not be created
+     */
     @Bean(name = "snowflakeHikariDataSource")
     public HikariDataSource snowflakeHikariDatasource(SnowflakeProperties snowflakeProperties){
         return DataSourceBuilder.create(snowflakeProperties.getClassLoader())
