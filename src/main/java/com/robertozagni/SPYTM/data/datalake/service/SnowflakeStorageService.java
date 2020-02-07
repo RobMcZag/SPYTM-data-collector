@@ -1,4 +1,4 @@
-package com.robertozagni.SPYTM.data.collector.datalake.service;
+package com.robertozagni.SPYTM.data.datalake.service;
 
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import lombok.extern.slf4j.Slf4j;

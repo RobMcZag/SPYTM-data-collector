@@ -1,10 +1,8 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data;
 
-import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDailyQuote;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,11 +34,11 @@ class SpytmDataCollectorApplicationTests {
 
 		commandLineRunner.run("DAILY_ADJUSTED", "MSFT", "AAPL");
 
-		verify(mockTemplate, times(2)).getForObject(anyString(), eq(AVTimeSerie.class));;
+		verify(mockTemplate, times(2)).getForObject(anyString(), eq(AVTimeSerie.class));
 	}
 
 	private AVTimeSerie makeEmptyTimeSerieData(){
-		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<String, AVDailyQuote>());
+		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<>());
 	}
 
 	private AVTimeSerieMetadata makeTestTimeSerieMetadata() {
