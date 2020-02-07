@@ -11,6 +11,13 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
+def sf_test_user = hasProperty('sf_test_user') ? sf_test_user : System.getenv('sf_test_user')
+def sf_test_pw = hasProperty('sf_test_pw') ? sf_test_pw : System.getenv('sf_test_pw')
+def spytm_test_user = hasProperty('spytm_test_user') ? spytm_test_user : System.getenv('spytm_test_user')
+def spytm_test_pw = hasProperty('spytm_test_pw') ? spytm_test_pw : System.getenv('spytm_test_pw')
+def spytm_prod_user = hasProperty('spytm_prod_user') ? spytm_prod_user : System.getenv('spytm_prod_user')
+def spytm_prod_pw = hasProperty('spytm_prod_pw') ? spytm_prod_pw : System.getenv('spytm_prod_pw')
+
 repositories {
     mavenCentral()
 }
