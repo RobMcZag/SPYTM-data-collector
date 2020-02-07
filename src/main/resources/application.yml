@@ -2,12 +2,36 @@ spring:
   profiles:
     active: test
 
+  flyway:
+    locations: classpath:/db/migration
+    schemas: spytm    # schema1,schema2,schema3
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate  # validate as we use Flyway // create | create-drop | validate | update | none
+
+# Uncomment to generate DDL files
+#    properties:
+#      javax:
+#        persistence:
+#          create-database-schemas: true
+#          schema-generation:
+#            create-source: metadata
+#            drop-source: metadata
+#            scripts:
+#              action: drop-and-create    # drop-and-create | create
+#              create-target: generated/test/db/create.sql
+#              drop-target: generated/test/db/drop.sql
+# Uncomment to run script to initialise content of DB (loading data)
+#          sql-load-script-source: <some_place>/initdb.sql
+
 datalake:
   url: jdbc:snowflake://wr04231.eu-west-1.snowflakecomputing.com
   account: wr04231
   region: eu-west-1
-  username: testappuser
-  password: testAppUserAcc0unt
+  username: ${sf_test_user}    # From environment / gradle
+  password: ${sf_test_pw}      # From environment / gradle
   role: SPYTMLAKE_USER_ROLE
   databaseName: SPYTMLAKE_TEST
   schema:
@@ -24,63 +48,37 @@ spring:
     username: sa
     password: password
     initialization-mode: always   # explicitly enable (even for this embedded db)
-  flyway:
-    locations: classpath:/db/migration
-    schemas: spytm    # schema1,schema2,schema3
   jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate  # validate as we use Flyway // create | create-drop | validate | update | none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         default_schema: spytm     # Define schema to use
-#      javax:
-#        persistence:    # Eventual javax.persistence properties
 
 ---
 spring:
   profiles: test_pg
   datasource:
     url: jdbc:postgresql://localhost:5432/spytm_test_db    # Schema defined below in properties.hibernate.default_schema
-    username: spytm_test_user
-    password: 1234-test-PW
+    username: ${spytm_test_user}
+    password: ${spytm_test_pw}
     initialization-mode: always   # explicitly enable (as not using an embedded db)
-  flyway:
-    locations: classpath:/db/migration
-    schemas: spytm    # schema1,schema2,schema3
   jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate  # validate as we use Flyway // create | create-drop | validate | update | none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: spytm     # Define schema to use (instead of the PG default 'public')
-# Uncomment to generate DDL files
-#      javax:
-#        persistence:
-#          create-database-schemas: true
-#          schema-generation:
-#            create-source: metadata
-#            drop-source: metadata
-#            scripts:
-#              action: drop-and-create    # drop-and-create | create
-#              create-target: generated/test/db/create.sql
-#              drop-target: generated/test/db/drop.sql
-# Uncomment to run script to initialise content of DB
-#          sql-load-script-source: <some_place>/initdb.sql
 
 ---
 spring:
   profiles: prod
   datasource:
     url: jdbc:postgresql://localhost:5432/spytm_prod_db
-    username: ${spytm_prod_user}    # From environment
-    password: ${spytm_prod_pw}      # From environment
+    username: ${spytm_prod_user}    # From environment / gradle
+    password: ${spytm_prod_pw}      # From environment / gradle
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: spytm     # Define schema to use (instead of the PG default 'public')
     hibernate:
       ddl-auto: none  # create | create-drop | validate | update | none

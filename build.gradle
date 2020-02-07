@@ -57,6 +57,10 @@ dependencies {
 
 }
 
+processResources {
+    expand(project.properties)
+}
+
 tasks.withType(Test) {  // make all Test sets use JUnit 5 - 'test' would have used it for unit tests only :)
     useJUnitPlatform()
 }
@@ -70,7 +74,7 @@ check.dependsOn integrationTest         // To have integrationTests run during t
 
 flyway {    // To use Flyway targets from Gradle without running Spring Boot
     url = 'jdbc:postgresql://localhost:5432/spytm_test_db'
-    user = 'spytm_test_user'
-    password = '1234-test-PW'
+    user = project.properties.spytm_test_user
+    password = project.properties.spytm_test_pw
     schemas = ['spytm']
 }
