@@ -35,8 +35,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         default_schema: spytm     # Define schema to use
-      javax:
-        persistence:    # Eventual javax.persistence properties
+#      javax:
+#        persistence:    # Eventual javax.persistence properties
 
 ---
 spring:
@@ -57,9 +57,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: spytm     # Define schema to use (instead of the PG default 'public')
-      javax:
-        persistence:
 # Uncomment to generate DDL files
+#      javax:
+#        persistence:
 #          create-database-schemas: true
 #          schema-generation:
 #            create-source: metadata
