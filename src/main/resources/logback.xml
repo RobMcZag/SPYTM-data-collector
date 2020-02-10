@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <root level="INFO">
+    </root>
+
+    <logger name="org.apache.commons.beanutils" level="INFO" >
+    </logger>
+
+</configuration>
