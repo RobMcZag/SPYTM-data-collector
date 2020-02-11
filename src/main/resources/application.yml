@@ -34,8 +34,8 @@ datalake:
   password: ${sf_test_pw}      # From environment / gradle
   role: SPYTMLAKE_USER_ROLE
   databaseName: SPYTMLAKE_TEST
-  schema:
-  warehouse:
+  schema: PUBLIC
+  warehouse: COMPUTE_WH
   # initialization-mode: never   # explicitly disable for Snowflake
 
 logging:
