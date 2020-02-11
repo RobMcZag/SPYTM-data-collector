@@ -38,6 +38,9 @@ datalake:
   warehouse:
   # initialization-mode: never   # explicitly disable for Snowflake
 
+logging:
+  level:
+    root: INFO
 ---
 spring:
   profiles: test
