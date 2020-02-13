@@ -57,7 +57,7 @@ public class SnowflakeStorageService {
     private void applyFlywayMigrationsToSF() {
         Flyway flyway = Flyway.configure()
                 .dataSource(sfDatasource)
-                .locations("db/snowflake")
+                .locations("db/snowflake/migration")
                 .load();
 
         flyway.migrate();
