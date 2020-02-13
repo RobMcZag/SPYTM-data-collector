@@ -168,7 +168,7 @@ public class SnowflakeStorageService {
     }
 
     private void copyFromStageToTable(String stagePathToFile, String tableName) throws SQLException {
-        String copyStgToTableSql = String.format(COPY_STG_TO_TABLE_SQL, tableName, stagePathToFile);
+        String copyStgToTableSql = String.format(MERGE_STG_TO_DAILY_TABLE, tableName, stagePathToFile);
         try {
             sfDatasource.getConnection().createStatement().execute(copyStgToTableSql);
             log.info(String.format("Copied data from stage '%s' to table %s.", stagePathToFile, tableName) );
@@ -185,9 +185,22 @@ public class SnowflakeStorageService {
         static final String STAGE_NAME = "SPYTM_QUOTES";
         static final String METADATA_TABLE_NAME = "QUOTES_METADATA";
 
-        static final String COPY_STG_TO_TABLE_SQL = "COPY INTO %s "
-                + "(provider,quotetype,symbol,date,open,high,low,close,volume,adjustedClose,dividendAmount,splitCoefficient)"
-                + "FROM %s FILE_FORMAT = (TYPE = CSV  SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '\"' );";
+        static final String MERGE_STG_TO_DAILY_TABLE =
+                "MERGE INTO %s m\n" +
+                "    USING (SELECT $1 as provider, $2 as quotetype, $3 as symbol, $4 as date,\n" +
+                "                  $5 as open, $6 as high, $7 as low, $8 as close, $9 as volume,\n" +
+                "                  $10 as adjustedClose, $11 as dividendAmount, $12 as splitCoefficient\n" +
+                "            FROM %s\n" +
+                "    ) as f\n" +
+                "        ON (m.PROVIDER = f.provider AND m.QUOTETYPE = f.quotetype AND m.SYMBOL = f.symbol AND m.date = f.date)\n" +
+                "    WHEN NOT MATCHED\n" +
+                "        THEN INSERT (provider,quotetype,symbol,date,open,high,low,close,volume,adjustedClose,dividendAmount,splitCoefficient)\n" +
+                "        VALUES (provider,quotetype,symbol,date,open,high,low,close,volume,adjustedClose,dividendAmount,splitCoefficient)\n" +
+                "    WHEN MATCHED AND m.date = current_date()\n" +
+                "        THEN UPDATE SET\n" +
+                "            m.open = f.open, m.high = f.high, m.low = f.low, m.close = f.close, m.volume = f.volume,\n" +
+                "            m.adjustedClose = f.adjustedClose, m.dividendAmount = f.dividendAmount, m.splitCoefficient = f.splitCoefficient,\n" +
+                "            m.insert_ts = current_timestamp()::timestamp_ntz;";
 
         static final String MERGE_METADATA_SQL = "" +
                 "MERGE INTO %s m " +
