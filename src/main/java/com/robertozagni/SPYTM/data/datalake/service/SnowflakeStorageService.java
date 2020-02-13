@@ -30,7 +30,7 @@ public class SnowflakeStorageService {
 
     private final SnowflakeBasicDataSource sfDatasource;
     private final CsvService csvService;
-    private PreparedStatement insertIntoMetadataStatement;
+    private PreparedStatement mergeIntoMetadataStatement;
 
     @Autowired
     public SnowflakeStorageService(@Qualifier("SnowflakeBasicDataSource") SnowflakeBasicDataSource sfDatasource,
@@ -43,8 +43,8 @@ public class SnowflakeStorageService {
 
             applyFlywayMigrationsToSF();
 
-            insertIntoMetadataStatement = sfDatasource.getConnection()
-                    .prepareStatement(String.format(INSERT_METADATA_SQL, METADATA_TABLE_NAME));
+            mergeIntoMetadataStatement = sfDatasource.getConnection()
+                    .prepareStatement(String.format(MERGE_METADATA_SQL, METADATA_TABLE_NAME));
 
         } catch (SQLException e) {
             log.error("Cannot apply migrations or prepare statements on Snowflake."
@@ -86,13 +86,13 @@ public class SnowflakeStorageService {
     }
 
     private void loadMetadataToSF(TimeSerieMetadata metadata) throws SQLException {
-        insertIntoMetadataStatement.setString(1, metadata.getProvider().toString());
-        insertIntoMetadataStatement.setString(2, metadata.getQuotetype().toString());
-        insertIntoMetadataStatement.setString(3, metadata.getSymbol());
-        insertIntoMetadataStatement.setString(4, metadata.getDescription());
-        insertIntoMetadataStatement.setString(5, metadata.getTimeZone());
-        insertIntoMetadataStatement.setString(6, metadata.getLastRefreshed());
-        insertIntoMetadataStatement.execute();
+        mergeIntoMetadataStatement.setString(1, metadata.getProvider().toString());
+        mergeIntoMetadataStatement.setString(2, metadata.getQuotetype().toString());
+        mergeIntoMetadataStatement.setString(3, metadata.getSymbol());
+        mergeIntoMetadataStatement.setString(4, metadata.getDescription());
+        mergeIntoMetadataStatement.setString(5, metadata.getTimeZone());
+        mergeIntoMetadataStatement.setString(6, metadata.getLastRefreshed());
+        mergeIntoMetadataStatement.execute();
     }
 
     /**
@@ -189,10 +189,19 @@ public class SnowflakeStorageService {
                 + "(provider,quotetype,symbol,date,open,high,low,close,volume,adjustedClose,dividendAmount,splitCoefficient)"
                 + "FROM %s FILE_FORMAT = (TYPE = CSV  SKIP_HEADER = 1 FIELD_OPTIONALLY_ENCLOSED_BY = '\"' );";
 
-        static final String INSERT_METADATA_SQL = "INSERT INTO %s "
-                + "(provider, quotetype, symbol, description, timeZone, lastRefreshed )"
-                + " VALUES (?, ?, ?, ?, ?, ?)";
-        // SQL Params  1          2         3         4           5          6
+        static final String MERGE_METADATA_SQL = "" +
+                "MERGE INTO %s m " +
+                "    USING (SELECT v.* FROM VALUES " +
+                "                  (?, ?, ?, ?, ?, ?)" +
+                "             as v (provider, quotetype, symbol, description, timeZone, lastRefreshed)" +
+                // SQL Params           1          2         3         4           5          6
+                "    ) as s" +
+                "        ON (m.PROVIDER = s.provider AND m.QUOTETYPE = s.quotetype AND m.SYMBOL = s.symbol)" +
+                "    WHEN MATCHED" +
+                "        THEN UPDATE SET m.LASTREFRESHED = s.lastRefreshed" +
+                "    WHEN NOT MATCHED" +
+                "        THEN INSERT (provider, quotetype, symbol, description, timeZone, lastRefreshed)" +
+                "            VALUES (provider, quotetype, symbol, description, timeZone, lastRefreshed);";
 
         private static final Random rnd = new Random();
 
