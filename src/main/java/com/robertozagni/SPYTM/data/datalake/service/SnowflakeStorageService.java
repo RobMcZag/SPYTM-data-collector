@@ -68,7 +68,8 @@ public class SnowflakeStorageService {
     }
 
     /**
-     * Utility method to load both Metadata and Quotes in one step to Snowflake.
+     * Load both Metadata and Quotes in one step to Snowflake.
+     *
      * @param timeSerie The time serie to be loaded in snowflake.
      */
     public void load(TimeSerie timeSerie) {
@@ -76,16 +77,28 @@ public class SnowflakeStorageService {
         loadQuotes(timeSerie);
     }
 
+    /**
+     * Loads the metatada into the right table in Snowflake.
+     *
+     * Catches the SQLException if something goes wrong and logs the error.
+     * To handle the exception yourself use the {@link #mergeMetadataInSF(TimeSerieMetadata)} method.
+     * @param metadata The time serie metadata to be loaded.
+     */
     public void loadMetadata(TimeSerieMetadata metadata) {
         try {
-            loadMetadataToSF(metadata);
+            mergeMetadataInSF(metadata);
         } catch (SQLException e) {
-            log.error("Could not load Metadata to Snowflake for " + metadata.getId()
+            log.error("Could not merge time serie Metadata into Snowflake for " + metadata.getId()
                     + " - Error: " + e.getMessage() +" - SQL State: "+ e.getSQLState());
         }
     }
 
-    private void loadMetadataToSF(TimeSerieMetadata metadata) throws SQLException {
+    /**
+     * Merges the given metadata info with the info already existing in Snowflake.
+     * @param metadata  The Metadata info to load.
+     * @throws SQLException If something goes wrong in the process.
+     */
+    public void mergeMetadataInSF(TimeSerieMetadata metadata) throws SQLException {
         mergeIntoMetadataStatement.setString(1, metadata.getProvider().toString());
         mergeIntoMetadataStatement.setString(2, metadata.getQuotetype().toString());
         mergeIntoMetadataStatement.setString(3, metadata.getSymbol());
@@ -96,19 +109,36 @@ public class SnowflakeStorageService {
     }
 
     /**
-     * Loads the given quotes to Snowflake, using the configured values from this service configuration.
+     * Loads the given quotes to Snowflake.
+     *
+     * Converts the quotes to CSV and loads them into SF, using the configured values from this service configuration.
+     * This method catches the possible exceptions and logs the error.
+     * If you want to manage the exception yourself use the {@link #loadCsvQuotesToSF(InputStream, String, QuoteType)} method
      * @param timeSerie The time serie to be loaded.
      */
     public void loadQuotes(TimeSerie timeSerie) {
         String csvQuotes = quotesToCSV(timeSerie);
         if (csvQuotes != null) {
-            loadCsvQuotesToSF(
-                    new ByteArrayInputStream(csvQuotes.getBytes(StandardCharsets.UTF_8)),
-                    timeSerie.getMetadata().getSymbol(),
-                    timeSerie.getMetadata().getQuotetype());
+            try {
+                loadCsvQuotesToSF(
+                        new ByteArrayInputStream(csvQuotes.getBytes(StandardCharsets.UTF_8)),
+                        timeSerie.getMetadata().getSymbol(),
+                        timeSerie.getMetadata().getQuotetype());
+            } catch (SQLException e) {
+                log.error(String.format("ERROR loading quotes from stage '%s' to table '%s' for Symbol %s (QType: %s)",
+                        getStageName(), getTableName(timeSerie.getMetadata().getQuotetype()),
+                        timeSerie.getMetadata().getSymbol(), timeSerie.getMetadata().getQuotetype()) );
+            }
         }
     }
 
+    /**
+     * Converts the given timeserie into CSV or returns a null value if not possible.
+     *
+     * This method catches possible exceptions thrown by the conversion and returns null in case of exceptions.
+     * @param timeSerie the TimeSerie to convert to CSV
+     * @return A String representing the Timeserie in CSV format or null
+     */
     private String quotesToCSV(TimeSerie timeSerie) {
         try {
             return csvService.quotesToCSV(timeSerie);
@@ -123,32 +153,33 @@ public class SnowflakeStorageService {
 
     /**
      * Loads the quotes represented as CSV in the inputStream to Snowflake.
+     *
      * @param inputStream A stream from which to read the quotes to be loaded, in CSV format.
      * @param quoteType The type of quote being loaded.
      * @param symbol The symbol of the security being loaded.
+     * @throws SQLException if something fails during the data load
      */
-    private void loadCsvQuotesToSF(InputStream inputStream, String symbol, QuoteType quoteType) {
+    public void loadCsvQuotesToSF(InputStream inputStream, String symbol, QuoteType quoteType) throws SQLException {
         String destFileName = getNewCsvFileName();     // Produces a different name every call... :)
-        try {
-            loadDataToStage(inputStream, symbol, quoteType, destFileName);
 
-            copyFromStageToTable(
-                    getStagePathToFile(quoteType, symbol, destFileName),
-                    getTableName(quoteType));
+        loadDataToStage(inputStream, symbol, quoteType, destFileName);
 
-            // TODO handle deduplication at load time
-            // TODO drop file after successful load
+        mergeFromStageToTable(getStagePathToFile(quoteType, symbol, destFileName), getTableName(quoteType));
 
-        } catch (SQLException e) {
-            log.error(String.format(
-                    "ERROR loading data from stage '%s' to table '%s' for Symbol %s (Quote type: %s)",
-                    getStageName(), getTableName(quoteType), symbol, quoteType) );
-        }
+        removeFromStage(getStagePathToFile(quoteType, symbol, destFileName));
+
     }
 
-
-
-    private void loadDataToStage(InputStream inputStream, String symbol, QuoteType quoteType, String destFileName) throws SQLException {
+    /**
+     * Loads the CSV formatted data from the input stream to a stage in Snowflake.
+     *
+     * @param inputStream the input stream with the data in CSV format
+     * @param symbol The symbol of the security being loaded.
+     * @param quoteType The type of quote being loaded.
+     * @param destFileName The name of the file to create in the stage to hold the data.
+     * @throws SQLException if something fails during the data load
+     */
+    void loadDataToStage(InputStream inputStream, String symbol, QuoteType quoteType, String destFileName) throws SQLException {
         try {
             sfDatasource.getConnection().unwrap(SnowflakeConnection.class)
                     .uploadStream(
@@ -161,21 +192,48 @@ public class SnowflakeStorageService {
                 getStageName(), getDestPrefix(quoteType, symbol), destFileName ) );
         } catch (SQLException e) {
             log.error( String.format(
-                    "Could not upload data to stage '%s' (destPrefix '%s' - destFileName '%s')",
-                    getStageName(), getDestPrefix(quoteType, symbol), destFileName) );
+                    "Could not upload data to stage '%s' (destPrefix '%s' - destFileName '%s').",
+                    getStageName(), getDestPrefix(quoteType, symbol), destFileName), e);
             throw e;
         }
     }
 
-    private void copyFromStageToTable(String stagePathToFile, String tableName) throws SQLException {
+    /**
+     * Merges the data from the staged file into the table.
+     *
+     * The data in the staged file and table must contain FullDay quotes, as opposed to Intraday quotes.
+     * @param stagePathToFile the full path to load, including the stage. Can contain wildcards.
+     * @param tableName the name of the table where to load the data.
+     * @throws SQLException if something goes worng
+     */
+    void mergeFromStageToTable(String stagePathToFile, String tableName) throws SQLException {
         String copyStgToTableSql = String.format(MERGE_STG_TO_DAILY_TABLE, tableName, stagePathToFile);
         try {
             sfDatasource.getConnection().createStatement().execute(copyStgToTableSql);
-            log.info(String.format("Copied data from stage '%s' to table %s.", stagePathToFile, tableName) );
+            log.info(String.format("Merged data from stage '%s' to table %s.", stagePathToFile, tableName) );
 
         } catch (SQLException e) {
             log.error(String.format(
-                    "SQL Exception while COPYing from stage '%s' to table '%s'.", stagePathToFile, tableName) );
+                    "SQL Exception while MERGing from stage '%s' to table '%s'.",
+                    stagePathToFile, tableName), e );
+            throw e;
+        }
+    }
+
+    /**
+     * Remove the file(s) identified by the path from the stage.
+     *
+     * @param stagePathToFile The path of the file(s) to be removed from the stage. Can contain wildcards.
+     * @throws SQLException if something goes wrong.
+     */
+    void removeFromStage(String stagePathToFile) throws SQLException {
+        try {
+            sfDatasource.getConnection().createStatement().execute("REMOVE " + stagePathToFile);
+            log.info(String.format("Removed file '%s' from stage.", stagePathToFile) );
+
+        } catch (SQLException e) {
+            log.error(String.format(
+                    "SQL Exception while REMOVING file '%s' from stage.", stagePathToFile), e );
             throw e;
         }
     }
