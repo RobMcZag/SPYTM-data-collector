@@ -15,6 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * A totally stateless service to convert between TimeSerie and CSV representation.
+ */
 @Service
 public class CsvService {
 

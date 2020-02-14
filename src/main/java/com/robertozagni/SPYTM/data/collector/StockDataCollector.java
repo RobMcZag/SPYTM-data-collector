@@ -73,7 +73,7 @@ public class StockDataCollector implements CommandLineRunner {
         timeSeries.values().forEach(
                 (TimeSerie serie) -> {
                     timeSerieStorageService.save(serie);
-                    log.info(String.format("Downloaded %d %s quotes for %s from %s!",
+                    log.info(String.format("Saved in local DB %d %s quotes for %s from %s!",
                             serie.getData().size(),
                             serie.getMetadata().getQuotetype(),
                             serie.getMetadata().getSymbol(),
@@ -81,9 +81,17 @@ public class StockDataCollector implements CommandLineRunner {
                 }
         );
 
-        // TODO send timeserie to SF - something like below
-        // snowflakeStorageService.save(timeSeries);
-         snowflakeStorageService.checkConnection();
+        timeSeries.values().forEach(
+                (TimeSerie serie) -> {
+                    snowflakeStorageService.load(serie);
+                    log.info(String.format("Loaded into SF %d %s quotes for %s from %s!",
+                            serie.getData().size(),
+                            serie.getMetadata().getQuotetype(),
+                            serie.getMetadata().getSymbol(),
+                            serie.getMetadata().getProvider()) );
+                }
+        );
+
     }
 
     DownloadConfig parseArgs(String[] args) {
