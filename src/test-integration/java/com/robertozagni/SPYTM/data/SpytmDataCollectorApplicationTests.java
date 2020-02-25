@@ -38,13 +38,13 @@ class SpytmDataCollectorApplicationTests {
 	}
 
 	private AVTimeSerie makeEmptyTimeSerieData(){
-		return new AVTimeSerie(makeTestTimeSerieMetadata(), new HashMap<>());
+		return AVTimeSerie.builder().metadata(makeTestTimeSerieMetadata()).build();
 	}
 
 	private AVTimeSerieMetadata makeTestTimeSerieMetadata() {
 		return new AVTimeSerieMetadata(
-				"Daily data",
-				"APPL",
+				"TEST Daily data",
+				"TEST",
 				"2020-09-27",
 				"compact",
 				"US/SomePlace");

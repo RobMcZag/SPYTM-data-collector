@@ -43,7 +43,6 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
                 AVTimeSerie data = restTemplate.getForObject(url, AVTimeSerie.class);
                 assert data != null;
                 if (data.getMetadata() == null) { continue; }   // We have nothing to say for this symbol
-                if (data.getAvQuotes() == null) { data.setAvQuotes(new HashMap<>()); }  // No quotes is fine
                 result.put(symbol, AVTimeSerie.toModel(data));
 
             } catch (RestClientException e) {
@@ -56,8 +55,29 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     }
 
     private String getFunctionName(QuoteType quoteType) {
-        // TODO make some more resilient mapper :)
-        return "TIME_SERIES_" + (quoteType==null ? "" : quoteType.name());
+        if (quoteType == null) {
+            throw new IllegalArgumentException("Quote provider can not be null.");
+        }
+        switch (quoteType) {
+            case INTRADAY:
+                throw new UnsupportedOperationException("Download of Intraday Quotes not yet implemented");
+
+            case DAILY:
+                return "TIME_SERIES_DAILY";
+            case DAILY_ADJUSTED:
+                return "TIME_SERIES_DAILY_ADJUSTED";
+            case WEEKLY:
+                return "TIME_SERIES_WEEKLY";
+            case WEEKLY_ADJUSTED:
+                return "TIME_SERIES_WEEKLY_ADJUSTED";
+            case MONTHLY:
+                return "TIME_SERIES_MONTHLY";
+            case MONTHLY_ADJUSTED:
+                return "TIME_SERIES_MONTHLY_ADJUSTED";
+
+            default:
+                return "TIME_SERIES_" + quoteType.name();
+        }
     }
 
 }

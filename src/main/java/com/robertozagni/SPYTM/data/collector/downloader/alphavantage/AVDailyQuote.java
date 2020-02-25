@@ -17,7 +17,7 @@ import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVDa
  *
  * This class has extra fields to be able to enrich the object and convert it to the Model representation.
  */
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AVDailyQuote {
 
     /* Extra fields to be able to enrich the object and convert it to the Model representation */
@@ -31,7 +31,8 @@ public class AVDailyQuote {
     @JsonProperty(value = LOW_MARKER) private double low;
     @JsonProperty(value = CLOSE_MARKER) private double close;
     @JsonProperty(value = ADJ_CLOSE_MARKER) private double adjustedClose;
-    @JsonProperty(value = VOLUME_MARKER) private long volume;
+    @JsonProperty(value = DAILY_VOLUME_MARKER) private long volume_daily;
+    @JsonProperty(value = ADJ_VOLUME_MARKER) private long volume;
     @JsonProperty(value = DIVIDEND_MARKER) private double dividendAmount;
     @JsonProperty(value = SPLIT_MARKER) private double splitCoefficient;
 
@@ -39,11 +40,26 @@ public class AVDailyQuote {
         return DailyQuote.builder()
                 .provider(QuoteProvider.APLPHA_VANTAGE)
                 .quotetype(quotetype).symbol(symbol).date(date)  // Quote key
-                .quote(Quote.builder().open(open).high(high).low(low).close(close).volume(volume).build())
+                .quote(Quote.builder().open(open).high(high).low(low).close(close).volume(getVolume()).build())
                 .adjustedClose(adjustedClose)
                 .dividendAmount(dividendAmount)
                 .splitCoefficient(splitCoefficient)
                 .build();
+    }
+
+    public long getVolume() {
+        return volume != 0 ? volume : volume_daily;
+    }
+    public long getVolume_daily() {
+        return getVolume();
+    }
+
+    public void setVolume(long volume) {
+        this.volume = volume;
+        this.volume_daily = volume;
+    }
+    public void setVolume_daily(long volume_daily) {
+        setVolume(volume_daily);
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -53,7 +69,8 @@ public class AVDailyQuote {
         static final String LOW_MARKER = "3. low";
         static final String CLOSE_MARKER = "4. close";
         static final String ADJ_CLOSE_MARKER = "5. adjusted close";
-        static final String VOLUME_MARKER = "6. volume";
+        static final String DAILY_VOLUME_MARKER = "5. volume";
+        static final String ADJ_VOLUME_MARKER = "6. volume";
         static final String DIVIDEND_MARKER = "7. dividend amount";
         static final String SPLIT_MARKER = "8. split coefficient";
     }

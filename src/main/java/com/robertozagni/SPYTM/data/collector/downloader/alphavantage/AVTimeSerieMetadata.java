@@ -21,7 +21,7 @@ public class AVTimeSerieMetadata {
     public TimeSerieMetadata toTimeSerieMetadata() {
         return TimeSerieMetadata.builder()
                 .provider(QuoteProvider.APLPHA_VANTAGE)
-                .quotetype(getQuoteType(seriesInfo))
+                .quotetype(getQuoteType())
                 .symbol(symbol)
                 .description(seriesInfo)
                 .timeZone(timeZone)
@@ -29,7 +29,11 @@ public class AVTimeSerieMetadata {
                 .build();
     }
 
-    private QuoteType getQuoteType(String seriesInfo) {
+    public   QuoteType getQuoteType() {
+        return getQuoteType(this.seriesInfo);
+    }
+
+    private static QuoteType getQuoteType(String seriesInfo) {
         switch (seriesInfo) {
             case INTRADAY: return QuoteType.INTRADAY;
             case DAILY: return QuoteType.DAILY;
