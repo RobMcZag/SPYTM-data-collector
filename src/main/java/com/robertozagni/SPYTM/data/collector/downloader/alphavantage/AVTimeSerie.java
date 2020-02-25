@@ -14,11 +14,30 @@ import java.util.Map;
 
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie.Constants.*;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AVTimeSerie {
 
     @JsonProperty(value = META_DATA) private AVTimeSerieMetadata metadata;
     @JsonProperty(value = DAILY_SERIES) private Map<String, AVDailyQuote> avQuotes;
+    @JsonProperty(value = WEEKLY_SERIES) private Map<String, AVDailyQuote> avQuotes_weekly;
+    @JsonProperty(value = WEEKLY_ADJ_SERIES) private Map<String, AVDailyQuote> avQuotes_weeklyAdj;
+    @JsonProperty(value = MONTHLY_SERIES) private Map<String, AVDailyQuote> avQuotes_monthly;
+    @JsonProperty(value = MONTHLY_ADJ_SERIES) private Map<String, AVDailyQuote> avQuotes_monthlyAdj;
+
+    public Map<String, AVDailyQuote> getAvQuotes() {
+        if (avQuotes != null) {
+            return avQuotes;
+        } else if (avQuotes_weekly != null) {
+            return avQuotes_weekly;
+        } else if (avQuotes_weeklyAdj != null) {
+            return avQuotes_weeklyAdj;
+        } else if (avQuotes_monthly != null) {
+            return avQuotes_monthly;
+        } else if (avQuotes_monthlyAdj != null) {
+            return avQuotes_monthlyAdj;
+        }
+        return new HashMap<>();
+    }
 
     public TimeSerie toModel() {
         return toModel(this);
@@ -32,12 +51,12 @@ public class AVTimeSerie {
     static public TimeSerie toModel(AVTimeSerie avTimeSerie) {
         TimeSerieMetadata metaData = avTimeSerie.getMetadata().toTimeSerieMetadata();
 
+        Map<String, AVDailyQuote> avQuoteMap = avTimeSerie.getAvQuotes();
         Map<String, DailyQuote> quotes = new HashMap<>();
-        for (String tradingDate: avTimeSerie.getAvQuotes().keySet()) {
-            AVDailyQuote avQuote = avTimeSerie.getAvQuotes().get(tradingDate);
+        for (String tradingDate: avQuoteMap.keySet()) {
+            AVDailyQuote avQuote = avQuoteMap.get(tradingDate);
 
-            // TODO Replace with info from metaData
-            avQuote.setQuotetype(QuoteType.DAILY_ADJUSTED);          // for now we always download this serie
+            avQuote.setQuotetype(metaData.getQuotetype());
             avQuote.setSymbol(metaData.getSymbol());
             avQuote.setDate(parseTradingDateTime(tradingDate).toLocalDate());
 
@@ -65,6 +84,10 @@ public class AVTimeSerie {
 
 
         public static final String META_DATA = "Meta Data";
-        public static final String DAILY_SERIES ="Time Series (Daily)";
+        public static final String DAILY_SERIES  = "Time Series (Daily)";
+        public static final String WEEKLY_SERIES = "Weekly Time Series";
+        public static final String WEEKLY_ADJ_SERIES = "Weekly Adjusted Time Series";
+        public static final String MONTHLY_SERIES = "Monthly Time Series";
+        public static final String MONTHLY_ADJ_SERIES = "Monthly Adjusted Time Series";
     }
 }

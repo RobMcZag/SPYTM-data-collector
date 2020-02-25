@@ -43,26 +43,26 @@ class AVTimeSerieTest {
     }
 
     @Test
-    void nulls_in_AVTimeSerie_should_throw_NullPointerException_when_convert_toModel() {
-        // null AVTimeSerie
+    void null_AVTimeSerie_should_throw_NullPointerException_when_convert_toModel() {
         assertThrows(NullPointerException.class,
                 () -> AVTimeSerie.toModel(null));
-
-        // null AVTimeSerieMetadata
+    }
+    @Test
+    void null_AVTimeSerieMetadata_should_throw_NullPointerException_when_convert_toModel() {
         assertThrows(NullPointerException.class,
                 () -> {
                     AVTimeSerie avTimeSerie = makeAVTimeSerie();
                     avTimeSerie.setMetadata(null);
                     AVTimeSerie.toModel(avTimeSerie);
                 });
-
-        // null AVTime daily quotes
-        assertThrows(NullPointerException.class,
-                () -> {
-                    AVTimeSerie avTimeSerie = makeAVTimeSerie();
-                    avTimeSerie.setAvQuotes(null);
-                    AVTimeSerie.toModel(avTimeSerie);
-                });
+    }
+    @Test
+    void no_data_in_AVTimeSerie_quotes_is_fine_when_convert_toModel() {
+        AVTimeSerie avTimeSerie = makeAVTimeSerie();
+        avTimeSerie.setAvQuotes(null);
+        TimeSerie timeSerie = AVTimeSerie.toModel(avTimeSerie);
+        assertNotNull(timeSerie);
+        assertEquals(0, timeSerie.getData().size());
     }
 
     /**
@@ -76,7 +76,10 @@ class AVTimeSerieTest {
         AVDailyQuote dailyQuote = AVDailyQuoteTest.makeTestAVDailyQuote();
         quotes.put(dailyQuote.getDate().toString(), dailyQuote);
 
-        return new AVTimeSerie(metadata,quotes);
+        return AVTimeSerie.builder()
+                .metadata(metadata)
+                .avQuotes(quotes)
+                .build();
     }
 
 }
