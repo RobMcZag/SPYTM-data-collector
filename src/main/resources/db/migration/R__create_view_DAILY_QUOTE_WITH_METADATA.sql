@@ -1,0 +1,5 @@
+CREATE OR REPLACE VIEW spytm.daily_quote_with_metadata AS
+SELECT q.PROVIDER, q.QUOTETYPE, q.SYMBOL, q.DATE, q.OPEN, q.CLOSE, q.LOW, q.HIGH, q.VOLUME, q.ADJUSTED_CLOSE, q.DIVIDEND_AMOUNT, q.SPLIT_COEFFICIENT, m.DESCRIPTION, m.TIME_ZONE, m.LAST_REFRESHED
+FROM spytm.daily_quote q
+         INNER JOIN spytm.time_serie_metadata m
+                    ON (q.PROVIDER = m.PROVIDER AND q.QUOTETYPE = m.QUOTETYPE AND q.SYMBOL = m.SYMBOL);
