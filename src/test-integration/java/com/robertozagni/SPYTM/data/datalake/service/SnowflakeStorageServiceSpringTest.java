@@ -38,6 +38,8 @@ class SnowflakeStorageServiceSpringTest {
 
     @Test
     void can_save_a_timeserie() throws IOException {
+        if (! snowflakeStorageService.isActive()) return;
+
         TimeSerie timeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_TimeSerie();
 
         // Write once and verify
@@ -94,6 +96,8 @@ class SnowflakeStorageServiceSpringTest {
 
     @Test
     void can_save_timeserie_metadata() {
+        if (! snowflakeStorageService.isActive()) return;
+
         RowMapper<TimeSerieMetadata> rowMapper = getTimeSerieMetadataRowMapper();
         TimeSerieMetadata metadata = makeTestTimeSerieMetadata();
 

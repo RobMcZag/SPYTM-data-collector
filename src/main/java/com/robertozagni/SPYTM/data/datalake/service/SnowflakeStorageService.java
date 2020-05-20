@@ -31,6 +31,7 @@ public class SnowflakeStorageService {
     private final SnowflakeBasicDataSource sfDatasource;
     private final CsvService csvService;
     private PreparedStatement mergeIntoMetadataStatement;
+    private boolean active = true;
 
     @Autowired
     public SnowflakeStorageService(@Qualifier("SnowflakeBasicDataSource") SnowflakeBasicDataSource sfDatasource,
@@ -47,11 +48,14 @@ public class SnowflakeStorageService {
                     .prepareStatement(String.format(MERGE_METADATA_SQL, METADATA_TABLE_NAME));
 
         } catch (SQLException e) {
+            active = false;
             log.error("Cannot apply migrations or prepare statements on Snowflake."
                     + " - Error: " + e.getMessage() +" - SQL State: "+ e.getSQLState());
-            throw e;
         }
+    }
 
+    public boolean isActive() {
+        return active;
     }
 
     private void applyFlywayMigrationsToSF() {
@@ -244,11 +248,11 @@ public class SnowflakeStorageService {
         static final String METADATA_TABLE_NAME = "QUOTES_METADATA";
 
         static final String MERGE_STG_TO_DAILY_TABLE =
-                "MERGE INTO %s m\n" +
+                "MERGE INTO %s m\n" +  // TABLE NAME
                 "    USING (SELECT $1 as provider, $2 as quotetype, $3 as symbol, $4 as date,\n" +
                 "                  $5 as open, $6 as high, $7 as low, $8 as close, $9 as volume,\n" +
                 "                  $10 as adjustedClose, $11 as dividendAmount, $12 as splitCoefficient\n" +
-                "            FROM %s\n" +
+                "            FROM %s\n" + // PATH TO FILE
                 "    ) as f\n" +
                 "        ON (m.PROVIDER = f.provider AND m.QUOTETYPE = f.quotetype AND m.SYMBOL = f.symbol AND m.date = f.date)\n" +
                 "    WHEN NOT MATCHED\n" +

@@ -81,6 +81,7 @@ public class StockDataCollector implements CommandLineRunner {
                 }
         );
 
+        if (snowflakeStorageService.isActive())
         timeSeries.values().forEach(
                 (TimeSerie serie) -> {
                     snowflakeStorageService.load(serie);
