@@ -47,6 +47,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'  // for warning: unknown enum constant When.MAYBE
     implementation 'org.flywaydb:flyway-core:6.2.2'
     implementation 'com.opencsv:opencsv:5.1'
     implementation group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.11.1'
