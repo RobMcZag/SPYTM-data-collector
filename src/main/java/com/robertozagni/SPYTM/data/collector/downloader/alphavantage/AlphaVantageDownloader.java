@@ -10,6 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -18,6 +19,15 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     private static final String API_KEY = "SHGHQ9MPDSLJSKO5";
 
     private static final String BASE_URL = "https://www.alphavantage.co/query";
+
+    /* Strings compact and full are accepted with the following specifications:
+     * compact returns only the latest 100 data points;
+     * full returns the full-length time series of 20+ years of historical data.
+     */
+    private static final String OUTPUT_SIZE = "compact";
+
+    private static final int NUM_CALL_PER_MINUTE = 5;   // Max 5 call per minute - 500 per day
+    private static final int MIN_SECS_BETWEEN_API_CALL = 60 / NUM_CALL_PER_MINUTE;
 
     private final RestTemplate restTemplate;
 
@@ -34,6 +44,7 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
                     .queryParam("function", getFunctionName(quoteType))
                     .queryParam("symbol", symbol)
+                    .queryParam("outputsize", OUTPUT_SIZE)
                     .queryParam("apikey", API_KEY);
             String url = builder.toUriString();
 
@@ -48,6 +59,15 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
             } catch (RestClientException e) {
                 log.error("Error while attempting to download data from " + url);
                 log.error(e.toString());
+            }
+
+            if (symbols.size() > NUM_CALL_PER_MINUTE) {
+                try {
+                    log.info("Waiting "+MIN_SECS_BETWEEN_API_CALL+" secs after downloading " + symbol + ".");
+                    TimeUnit.SECONDS.sleep(MIN_SECS_BETWEEN_API_CALL);
+                } catch (InterruptedException ignored) {
+                    log.info("Interrupted earlier than expected...");
+                }
             }
         }
         return result;
