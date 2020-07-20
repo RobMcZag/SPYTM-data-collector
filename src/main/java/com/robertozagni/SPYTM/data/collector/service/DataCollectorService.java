@@ -64,7 +64,7 @@ public class DataCollectorService implements CommandLineRunner {
 
     }
 
-    private Map<String, TimeSerie> downloadAndSave(DownloadRequest downloadRequest) {
+    public Map<String, TimeSerie> downloadAndSave(DownloadRequest downloadRequest) {
         Map<String, TimeSerie> timeSeries = dataDownloaderService.downloadQuotes(downloadRequest);
         timeSeries.values().forEach(
                 (TimeSerie serie) ->
@@ -88,7 +88,7 @@ public class DataCollectorService implements CommandLineRunner {
         return timeSeries;
     }
 
-    private void loadToDatalake(Map<String, TimeSerie> timeSeries) {
+    public void loadToDatalake(Map<String, TimeSerie> timeSeries) {
         timeSeries.values().forEach(
                 (TimeSerie serie) -> {
                     snowflakeStorageService.load(serie);
