@@ -2,6 +2,7 @@ package com.robertozagni.SPYTM.data.collector.service;
 
 import com.robertozagni.SPYTM.data.collector.downloader.Downloader;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,29 +12,29 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StockDataDownloaderServiceTest {
+class DataDownloaderServiceTest {
 
     @Mock RestTemplate mockRestTemplate;
-    private StockDataDownloaderService stockDataDownloaderService;
+    private DataDownloaderService dataDownloaderService;
 
     @BeforeEach
     void init() {
         MockitoAnnotations.initMocks(this);
-        stockDataDownloaderService = new StockDataDownloaderService(mockRestTemplate);
+        dataDownloaderService = new DataDownloaderService(mockRestTemplate);
     }
 
     @Test
     void default_provider_is_used_if_null_is_passed() {
-        Downloader downloader = stockDataDownloaderService.getDownloader(null);
+        Downloader downloader = dataDownloaderService.getDownloader(null);
 
         assertNotNull(downloader);
 
-        assert stockDataDownloaderService.getDefaultQuoteProvider() == QuoteProvider.APLPHA_VANTAGE;
+        assert DownloadRequest.getDefaultQuoteProvider() == QuoteProvider.APLPHA_VANTAGE;
         assertTrue(downloader instanceof AlphaVantageDownloader);
     }
     @Test
     void AV_provider_is_used_if_AV_is_passed() {
-        Downloader downloader = stockDataDownloaderService.getDownloader(QuoteProvider.APLPHA_VANTAGE);
+        Downloader downloader = dataDownloaderService.getDownloader(QuoteProvider.APLPHA_VANTAGE);
 
         assertNotNull(downloader);
         assertTrue(downloader instanceof AlphaVantageDownloader);
@@ -42,7 +43,7 @@ class StockDataDownloaderServiceTest {
     void TEST_provider_generates_exception() {
         assertThrows(
                 UnsupportedOperationException.class,
-                () -> stockDataDownloaderService.getDownloader(QuoteProvider.TEST_PROVIDER)
+                () -> dataDownloaderService.getDownloader(QuoteProvider.TEST_PROVIDER)
         );
 
     }

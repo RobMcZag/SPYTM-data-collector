@@ -1,13 +1,10 @@
 package com.robertozagni.SPYTM.data.collector.service;
 
-import com.robertozagni.SPYTM.data.collector.StockDataCollector;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.downloader.Downloader;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,15 +13,11 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Service
-public class StockDataDownloaderService {
+public class DataDownloaderService {
     private final RestTemplate restTemplate;
 
-    private @Getter @Setter QuoteType defaultQuoteType = QuoteType.DAILY_ADJUSTED;
-    private @Getter @Setter QuoteProvider defaultQuoteProvider = QuoteProvider.APLPHA_VANTAGE;
-
-
     @Autowired
-    public StockDataDownloaderService(RestTemplate restTemplate) {
+    public DataDownloaderService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -36,17 +29,17 @@ public class StockDataDownloaderService {
      *
      * Note: the results contains only symbols for which data was available.
      *
-     * @param cfg the configuration holding the desired provider, time serie type and list of symbols
+     * @param downloadRequest the configuration holding the desired provider, time serie type and list of symbols
      * @return a map with symbols as keys and a TimeSerie with the downloaded data as value
      */
-    public Map<String, TimeSerie> downloadQuotes(@NotNull StockDataCollector.DownloadConfig cfg) {
-        return getDownloader(cfg.getQuoteProvider())
-                .download(cfg.getQuoteType(), cfg.getSymbols());
+    public Map<String, TimeSerie> downloadQuotes(@NotNull DownloadRequest downloadRequest) {
+        return getDownloader(downloadRequest.getQuoteProvider())
+                .download(downloadRequest);
     }
 
     Downloader getDownloader(QuoteProvider quoteProvider) {
         if (quoteProvider == null) {
-            quoteProvider = getDefaultQuoteProvider();
+            quoteProvider = DownloadRequest.getDefaultQuoteProvider();
         }
         switch (quoteProvider) {
             case TEST_PROVIDER:

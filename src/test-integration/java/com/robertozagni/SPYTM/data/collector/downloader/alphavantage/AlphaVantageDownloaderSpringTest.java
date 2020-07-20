@@ -1,5 +1,7 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
+import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +57,13 @@ public class AlphaVantageDownloaderSpringTest {
                         .body(content)
                 );
 
-        Map<String, TimeSerie> download = downloader.download(QuoteType.DAILY, Collections.singletonList("MSFT"));
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                Collections.singletonList("MSFT")
+        );
+        Map<String, TimeSerie> download = downloader.download(downloadRequest);
         assertNotNull(download);
 
         TimeSerie msft = download.get("MSFT");

@@ -1,48 +1,44 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data.collector.service;
 
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
-import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.service.StockDataDownloaderService;
 import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
-import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Simple runner to download, store locally and push to the data lake quote data for some stock symbols.
+ * Service to download, store locally and eventually push to the data lake
+ * the quotes for one or more stock symbols.
  *
  * Downloads the requested time-serie for the requested symbols.
  * Stores the downloaded TimeSeries in the local DB.
  * Pushes the data to the data lake.
  *
- * command line arguments: [QuoteType] [QuoteProvider] Symbol1 Symbol2 ...
- * All passed arguments are parsed to check if they identify a QuoteType or QuoteProvider to use.
- * All arguments not identifying a QuoteType or QuoteProvider is considered a security symbol to download data for.
+ * It also acts as a runner with the initial command line arguments:
+ *      [QuoteType] [QuoteProvider] [DownloadSize] Symbol1 Symbol2 ...
+ * All arguments are parsed to check if they identify a download parameter,
+ * i.e. QuoteType or QuoteProvider or DownloadSize.
+ * All arguments not identifying a parameter are considered a security symbol to download data for.
  *
  */
 @Slf4j
 @Service
-public class StockDataCollector implements CommandLineRunner {
+public class DataCollectorService implements CommandLineRunner {
 
-    private final StockDataDownloaderService stockDataDownloaderService;
+    private final DataDownloaderService dataDownloaderService;
     private final TimeSerieStorageService timeSerieStorageService;
     private SnowflakeStorageService snowflakeStorageService;
 
     @Autowired
-    public StockDataCollector(
-            StockDataDownloaderService stockDataDownloaderService,
+    public DataCollectorService(
+            DataDownloaderService dataDownloaderService,
             TimeSerieStorageService timeSerieStorageService,
             SnowflakeStorageService snowflakeStorageService) {
-        this.stockDataDownloaderService = stockDataDownloaderService;
+        this.dataDownloaderService = dataDownloaderService;
         this.timeSerieStorageService = timeSerieStorageService;
         this.snowflakeStorageService = snowflakeStorageService;
     }
@@ -58,9 +54,18 @@ public class StockDataCollector implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        DownloadConfig cfg = parseArgs(args);
+        DownloadRequest downloadRequest = DownloadRequest.parseArgs(args);
 
-        Map<String, TimeSerie> timeSeries = stockDataDownloaderService.downloadQuotes(cfg);
+        Map<String, TimeSerie> timeSeries = downloadAndSave(downloadRequest);
+
+        if (snowflakeStorageService.isActive()) {
+            loadToDatalake(timeSeries);
+        }
+
+    }
+
+    public Map<String, TimeSerie> downloadAndSave(DownloadRequest downloadRequest) {
+        Map<String, TimeSerie> timeSeries = dataDownloaderService.downloadQuotes(downloadRequest);
         timeSeries.values().forEach(
                 (TimeSerie serie) ->
                     log.info(String.format("Downloaded %d %s quotes for %s from %s!",
@@ -80,8 +85,10 @@ public class StockDataCollector implements CommandLineRunner {
                             serie.getMetadata().getProvider()) );
                 }
         );
+        return timeSeries;
+    }
 
-        if (snowflakeStorageService.isActive())
+    public void loadToDatalake(Map<String, TimeSerie> timeSeries) {
         timeSeries.values().forEach(
                 (TimeSerie serie) -> {
                     snowflakeStorageService.load(serie);
@@ -92,34 +99,7 @@ public class StockDataCollector implements CommandLineRunner {
                             serie.getMetadata().getProvider()) );
                 }
         );
-
     }
 
-    DownloadConfig parseArgs(String[] args) {
-        QuoteType quoteType = stockDataDownloaderService.getDefaultQuoteType();
-        QuoteProvider quoteProvider = stockDataDownloaderService.getDefaultQuoteProvider();
-        List<String> symbols = new ArrayList<>();
-
-        for (String arg: args) {
-            try {
-                quoteType = QuoteType.valueOf(arg);
-                continue;
-            } catch (IllegalArgumentException ignored) { }   // Not a serie type
-            try {
-                quoteProvider = QuoteProvider.valueOf(arg);
-                continue;
-            } catch (IllegalArgumentException ignored) { }   // Not a provider
-
-            symbols.add(arg);                                // Then it's a symbol ! :)
-        }
-        return new DownloadConfig(quoteType, quoteProvider, symbols);
-    }
-
-    @AllArgsConstructor @Getter
-    public static class DownloadConfig {
-        private QuoteType quoteType;
-        private QuoteProvider quoteProvider;
-        List<String> symbols;
-    }
 
 }
