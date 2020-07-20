@@ -1,14 +1,12 @@
-package com.robertozagni.SPYTM.data.collector;
+package com.robertozagni.SPYTM.data.collector.service;
 
-import com.robertozagni.SPYTM.data.collector.StockDataCollector.DownloadConfig;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerie;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloaderTestHelper;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
-import com.robertozagni.SPYTM.data.collector.service.StockDataDownloaderService;
 import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
-import com.robertozagni.SPYTM.data.collector.service.TimeSerieStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,18 +18,18 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class StockDataCollectorTest {
+public class DataCollectorServiceTest {
 
     @Mock RestTemplate restTemplate;
     @Mock TimeSerieStorageService timeSerieStorageService;
     @Mock SnowflakeStorageService snowflakeStorageService;
-    private StockDataCollector downloaderRunner;
+    private DataCollectorService downloaderRunner;
 
     @BeforeEach
     void init() {
         MockitoAnnotations.initMocks(this);
-        StockDataDownloaderService stockDataDownloaderService = new StockDataDownloaderService(restTemplate);
-        downloaderRunner = new StockDataCollector(stockDataDownloaderService, timeSerieStorageService, snowflakeStorageService);
+        DataDownloaderService dataDownloaderService = new DataDownloaderService(restTemplate);
+        downloaderRunner = new DataCollectorService(dataDownloaderService, timeSerieStorageService, snowflakeStorageService);
     }
 
     @Test
@@ -56,22 +54,22 @@ public class StockDataCollectorTest {
     void dataSerie_and_symbols_are_parsed_and_passed() {
         String[] args = {"DAILY_ADJUSTED", "MSFT", "AAPL"};
 
-        DownloadConfig downloadConfig = downloaderRunner.parseArgs(args);
+        DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
         assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.APLPHA_VANTAGE);
         assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
-        assertIterableEquals(downloadConfig.symbols, Arrays.asList("MSFT", "AAPL"));
+        assertIterableEquals(downloadConfig.getSymbols(), Arrays.asList("MSFT", "AAPL"));
     }
 
     @Test
     void no_dataSerie_uses_default() {
         String[] args = {"MSFT", "AAPL", "XYZ"};
 
-        DownloadConfig downloadConfig = downloaderRunner.parseArgs(args);
+        DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
         assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.APLPHA_VANTAGE);
         assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
-        assertIterableEquals(downloadConfig.symbols, Arrays.asList("MSFT", "AAPL", "XYZ"));
+        assertIterableEquals(downloadConfig.getSymbols(), Arrays.asList("MSFT", "AAPL", "XYZ"));
 
     }
 
@@ -79,7 +77,7 @@ public class StockDataCollectorTest {
     void test_provider_is_recognized() {
         String[] args = {"TEST_PROVIDER", "AAPL", "XYZ"};
 
-        DownloadConfig downloadConfig = downloaderRunner.parseArgs(args);
+        DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
         assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.TEST_PROVIDER);
         assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
