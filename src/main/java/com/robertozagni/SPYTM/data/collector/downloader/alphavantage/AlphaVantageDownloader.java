@@ -20,12 +20,6 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
 
     private static final String BASE_URL = "https://www.alphavantage.co/query";
 
-    /* Strings compact and full are accepted with the following specifications:
-     * compact returns only the latest 100 data points;
-     * full returns the full-length time series of 20+ years of historical data.
-     */
-    private static final String OUTPUT_SIZE = "compact";
-
     private static final int NUM_CALL_PER_MINUTE = 5;   // Max 5 call per minute - 500 per day
     private static final int MIN_SECS_BETWEEN_API_CALL = 60 / NUM_CALL_PER_MINUTE;
 
@@ -36,15 +30,15 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
     }
 
     @Override
-    public Map<String, TimeSerie> download(QuoteType quoteType, List<String> symbols) {
+    public Map<String, TimeSerie> download(DownloadRequest downloadRequest) {
         Map<String, TimeSerie> result = new HashMap<>();
-        if (symbols == null) { return result; }
+        if (downloadRequest.getSymbols() == null) { return result; }
 
-        for (String symbol: symbols) {
+        for (String symbol: downloadRequest.getSymbols()) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
-                    .queryParam("function", getFunctionName(quoteType))
+                    .queryParam("function", getFunctionName(downloadRequest.getQuoteType()))
                     .queryParam("symbol", symbol)
-                    .queryParam("outputsize", OUTPUT_SIZE)
+                    .queryParam("outputsize", getOutputSize(downloadRequest.getDownloadSize()))
                     .queryParam("apikey", API_KEY);
             String url = builder.toUriString();
 
@@ -61,7 +55,7 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
                 log.error(e.toString());
             }
 
-            if (symbols.size() > NUM_CALL_PER_MINUTE) {
+            if (downloadRequest.getSymbols().size() > NUM_CALL_PER_MINUTE) {
                 try {
                     log.info("Waiting "+MIN_SECS_BETWEEN_API_CALL+" secs after downloading " + symbol + ".");
                     TimeUnit.SECONDS.sleep(MIN_SECS_BETWEEN_API_CALL);
@@ -72,6 +66,27 @@ public class AlphaVantageDownloader implements com.robertozagni.SPYTM.data.colle
         }
         return result;
 
+    }
+
+    /**
+     * Returns the string representing the required download size for this downloader.
+     *
+     * Strings "compact" and "full" are accepted with the following specifications:
+     * - compact returns only the latest 100 data points;
+     * - full returns the full-length time series of 20+ years of historical data.
+     */
+    private String getOutputSize(DownloadSize downloadSize) {
+        if (downloadSize == null) {
+            throw new IllegalArgumentException("Download Size can not be null.");
+        }
+        switch (downloadSize) {
+            case FULL:
+                return "full";
+
+            default:
+            case LATEST:
+                return "compact";
+        }
     }
 
     private String getFunctionName(QuoteType quoteType) {

@@ -1,6 +1,7 @@
 package com.robertozagni.SPYTM.data.collector.controller;
 
 import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
+import com.robertozagni.SPYTM.data.collector.model.DownloadSize;
 import com.robertozagni.SPYTM.data.collector.service.DataCollectorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,20 @@ public class DataCollectorController {
                 DownloadRequest.getDefaultQuoteType(),
                 DownloadRequest.getDefaultQuoteProvider(),
                 DownloadRequest.getDefaultDownloadSize(),
+                Collections.singletonList(symbol)
+        );
+
+        dataCollectorService.downloadAndSave(downloadRequest);
+
+        return downloadRequest;
+    }
+
+    @GetMapping("/downloadFull/{symbol}")
+    public DownloadRequest downloadFull(@PathVariable String symbol) {
+        DownloadRequest downloadRequest = new DownloadRequest(
+                DownloadRequest.getDefaultQuoteType(),
+                DownloadRequest.getDefaultQuoteProvider(),
+                DownloadSize.FULL,
                 Collections.singletonList(symbol)
         );
 

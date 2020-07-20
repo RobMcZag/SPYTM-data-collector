@@ -29,12 +29,12 @@ public class DataDownloaderService {
      *
      * Note: the results contains only symbols for which data was available.
      *
-     * @param cfg the configuration holding the desired provider, time serie type and list of symbols
+     * @param downloadRequest the configuration holding the desired provider, time serie type and list of symbols
      * @return a map with symbols as keys and a TimeSerie with the downloaded data as value
      */
-    public Map<String, TimeSerie> downloadQuotes(@NotNull DownloadRequest cfg) {
-        return getDownloader(cfg.getQuoteProvider())
-                .download(cfg.getQuoteType(), cfg.getSymbols());
+    public Map<String, TimeSerie> downloadQuotes(@NotNull DownloadRequest downloadRequest) {
+        return getDownloader(downloadRequest.getQuoteProvider())
+                .download(downloadRequest);
     }
 
     Downloader getDownloader(QuoteProvider quoteProvider) {
