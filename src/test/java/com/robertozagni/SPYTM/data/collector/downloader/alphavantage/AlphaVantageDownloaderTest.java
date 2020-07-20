@@ -1,7 +1,6 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +34,13 @@ class AlphaVantageDownloaderTest {
 
         when(mockRestTemplate.getForObject(contains("&symbol=MSFT&"), eq(AVTimeSerie.class))).thenReturn(msftAVTimeSerie);
 
-        Map<String, TimeSerie> timeSerieMap = downloader.download(QuoteType.DAILY_ADJUSTED, msft);
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                msft
+        );
+        Map<String, TimeSerie> timeSerieMap = downloader.download(downloadRequest);
 
         verify(mockRestTemplate, times(msft.size())).getForObject(anyString(), eq(AVTimeSerie.class));
 
@@ -53,7 +58,13 @@ class AlphaVantageDownloaderTest {
         when(mockRestTemplate.getForObject(anyString(), eq(AVTimeSerie.class))).thenReturn(emptyAVTimeSerie);
         when(mockRestTemplate.getForObject(contains("&symbol=MSFT&"), eq(AVTimeSerie.class))).thenReturn(msftAVTimeSerie);
 
-        Map<String, TimeSerie> timeSerieMap = downloader.download(QuoteType.DAILY_ADJUSTED, symbols);
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                symbols
+        );
+        Map<String, TimeSerie> timeSerieMap = downloader.download(downloadRequest);
 
         verify(mockRestTemplate, times(symbols.size())).getForObject(anyString(), eq(AVTimeSerie.class));
 
@@ -63,14 +74,26 @@ class AlphaVantageDownloaderTest {
     }
     @Test
     void return_empty_timeserie_when_null_is_passed_for_symbol() {
-        Map<String, TimeSerie> noDataExpected = downloader.download(QuoteType.DAILY, null);
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                null
+        );
+        Map<String, TimeSerie> noDataExpected = downloader.download(downloadRequest);
         assertNotNull(noDataExpected);
         assertTrue(noDataExpected.isEmpty());
     }
 
     @Test
     void return_empty_timeserie_when_no_simbol_is_passed() {
-        Map<String, TimeSerie> noDataExpected = downloader.download(null, new ArrayList<>());
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                new ArrayList<>()
+        );
+        Map<String, TimeSerie> noDataExpected = downloader.download(downloadRequest);
         assertNotNull(noDataExpected);
         assertTrue(noDataExpected.isEmpty());
     }
@@ -80,7 +103,13 @@ class AlphaVantageDownloaderTest {
         when(mockRestTemplate.getForObject(anyString(), eq(AVTimeSerie.class)))
                 .thenThrow(new RestClientException("Sorry, I am just a mock ! I can not retrieve data for you"));
 
-        Map<String, TimeSerie> noDataExpected = downloader.download(QuoteType.DAILY, Collections.singletonList("MSFT"));
+        DownloadRequest downloadRequest = new DownloadRequest(
+                QuoteType.DAILY,
+                QuoteProvider.APLPHA_VANTAGE,
+                DownloadRequest.getDefaultDownloadSize(),
+                Collections.singletonList("MSFT")
+        );
+        Map<String, TimeSerie> noDataExpected = downloader.download(downloadRequest);
         assertNotNull(noDataExpected);
         assertTrue(noDataExpected.isEmpty());
     }
