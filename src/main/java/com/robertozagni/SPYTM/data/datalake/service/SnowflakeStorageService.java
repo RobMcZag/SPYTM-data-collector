@@ -5,6 +5,7 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
+import com.robertozagni.SPYTM.data.datalake.SnowflakeProperties;
 import lombok.extern.slf4j.Slf4j;
 import net.snowflake.client.jdbc.SnowflakeBasicDataSource;
 import net.snowflake.client.jdbc.SnowflakeConnection;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Random;
 
 import static com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService.SnowflakeStorageConfig.*;
@@ -28,34 +30,41 @@ import static com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageServi
 @Service
 public class SnowflakeStorageService {
 
-    private final SnowflakeBasicDataSource sfDatasource;
+    private SnowflakeBasicDataSource sfDatasource;
+    private final SnowflakeProperties snowflakeProperties;
     private final CsvService csvService;
     private PreparedStatement mergeIntoMetadataStatement;
-    private boolean active = true;
 
     @Autowired
-    public SnowflakeStorageService(@Qualifier("SnowflakeBasicDataSource") SnowflakeBasicDataSource sfDatasource,
-                                   CsvService csvService) throws SQLException {
-        this.sfDatasource = sfDatasource;
+    public SnowflakeStorageService(@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+                                   @Qualifier("SnowflakeBasicDataSource")
+                                        Optional<SnowflakeBasicDataSource> sfDatasource,
+                                   SnowflakeProperties snowflakeProperties,
+                                   CsvService csvService) {
+        this.snowflakeProperties = snowflakeProperties;
         this.csvService = csvService;
 
-        try {
-            checkConnectionToSF();
+        if (snowflakeProperties.isActive() && sfDatasource.isPresent()) {
+            this.sfDatasource = sfDatasource.get();
+            try {
+                checkConnectionToSF();
 
-            applyFlywayMigrationsToSF();
+                applyFlywayMigrationsToSF();
 
-            mergeIntoMetadataStatement = sfDatasource.getConnection()
-                    .prepareStatement(String.format(MERGE_METADATA_SQL, METADATA_TABLE_NAME));
+                mergeIntoMetadataStatement = this.sfDatasource.getConnection()
+                        .prepareStatement(String.format(MERGE_METADATA_SQL, METADATA_TABLE_NAME));
 
-        } catch (SQLException e) {
-            active = false;
-            log.error("Cannot apply migrations or prepare statements on Snowflake."
-                    + " - Error: " + e.getMessage() +" - SQL State: "+ e.getSQLState());
+            } catch (SQLException e) {
+                snowflakeProperties.setActive(false);
+                log.error("Cannot apply migrations or prepare statements on Snowflake."
+                        + " - Error: " + e.getMessage() +" - SQL State: "+ e.getSQLState());
+            }
+
         }
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isEnabled() {
+        return snowflakeProperties.isActive();
     }
 
     private void applyFlywayMigrationsToSF() {

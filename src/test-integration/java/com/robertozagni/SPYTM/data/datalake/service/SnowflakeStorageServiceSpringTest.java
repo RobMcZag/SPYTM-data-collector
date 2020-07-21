@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,31 +27,35 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class SnowflakeStorageServiceSpringTest {
 
-    private SnowflakeStorageService snowflakeStorageService;
+    private final SnowflakeStorageService snowflakeStorageService;
     private JdbcTemplate sfJdbcTemplate;
 
     @Autowired
-    SnowflakeStorageServiceSpringTest(SnowflakeBasicDataSource sfDataSource, SnowflakeStorageService snowflakeStorageService) {
-        this.sfJdbcTemplate = new JdbcTemplate(sfDataSource);
+    SnowflakeStorageServiceSpringTest(@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+                                              Optional<SnowflakeBasicDataSource> sfDataSource,
+                                      SnowflakeStorageService snowflakeStorageService) {
         this.snowflakeStorageService = snowflakeStorageService;
+        if (snowflakeStorageService.isEnabled() && sfDataSource.isPresent()) {
+           this.sfJdbcTemplate = new JdbcTemplate(sfDataSource.get());
+        }
     }
 
 
     @Test
     void can_save_a_timeserie() throws IOException {
-        if (! snowflakeStorageService.isActive()) return;
+        if (snowflakeStorageService.isEnabled()) {
+            TimeSerie timeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_TimeSerie();
 
-        TimeSerie timeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_TimeSerie();
+            // Write once and verify
+            snowflakeStorageService.load(timeSerie);
+            checkTSMetadataIsInSnowflake(timeSerie.getMetadata());
+            checkAllTSQuotesAreInSnowflake(timeSerie);
 
-        // Write once and verify
-        snowflakeStorageService.load(timeSerie);
-        checkTSMetadataIsInSnowflake(timeSerie.getMetadata());
-        checkAllTSQuotesAreInSnowflake(timeSerie);
-
-        // Write again and verify no duplication
-        snowflakeStorageService.load(timeSerie);
-        checkTSMetadataIsInSnowflake(timeSerie.getMetadata());
-        checkAllTSQuotesAreInSnowflake(timeSerie);
+            // Write again and verify no duplication
+            snowflakeStorageService.load(timeSerie);
+            checkTSMetadataIsInSnowflake(timeSerie.getMetadata());
+            checkAllTSQuotesAreInSnowflake(timeSerie);
+        }
     }
 
     private void checkTSMetadataIsInSnowflake(TimeSerieMetadata timeSerieMetadata) {
@@ -96,24 +101,23 @@ class SnowflakeStorageServiceSpringTest {
 
     @Test
     void can_save_timeserie_metadata() {
-        if (! snowflakeStorageService.isActive()) return;
+        if (snowflakeStorageService.isEnabled()) {
+            RowMapper<TimeSerieMetadata> rowMapper = getTimeSerieMetadataRowMapper();
+            TimeSerieMetadata metadata = makeTestTimeSerieMetadata();
 
-        RowMapper<TimeSerieMetadata> rowMapper = getTimeSerieMetadataRowMapper();
-        TimeSerieMetadata metadata = makeTestTimeSerieMetadata();
+            snowflakeStorageService.loadMetadata(metadata);
+            List<TimeSerieMetadata> metadataList = sfJdbcTemplate.query(selectMetadataByKeySQL(metadata), rowMapper);
+            assertNotNull(metadataList);
+            assertEquals(1, metadataList.size());
+            assertEquals(metadata, metadataList.get(0));
 
-        snowflakeStorageService.loadMetadata(metadata);
-        List<TimeSerieMetadata> metadataList = sfJdbcTemplate.query(selectMetadataByKeySQL(metadata), rowMapper);
-        assertNotNull(metadataList);
-        assertEquals(1, metadataList.size());
-        assertEquals(metadata, metadataList.get(0));
-
-        metadata.setLastRefreshed(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        snowflakeStorageService.loadMetadata(metadata);
-        metadataList = sfJdbcTemplate.query(selectMetadataByKeySQL(metadata), rowMapper);
-        assertNotNull(metadataList);
-        assertEquals(1, metadataList.size());
-        assertEquals(metadata, metadataList.get(0));
-
+            metadata.setLastRefreshed(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            snowflakeStorageService.loadMetadata(metadata);
+            metadataList = sfJdbcTemplate.query(selectMetadataByKeySQL(metadata), rowMapper);
+            assertNotNull(metadataList);
+            assertEquals(1, metadataList.size());
+            assertEquals(metadata, metadataList.get(0));
+        }
     }
 
     private RowMapper<TimeSerieMetadata> getTimeSerieMetadataRowMapper() {

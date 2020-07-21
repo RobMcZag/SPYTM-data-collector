@@ -33,16 +33,16 @@ spring:
 #          sql-load-script-source: <some_place>/initdb.sql
 
 datalake:
-  url: jdbc:snowflake://wr04231.eu-west-1.snowflakecomputing.com
-  account: wr04231
-  region: eu-west-1
-  username: ${sf_test_user}    # From environment / gradle
-  password: ${sf_test_pw}      # From environment / gradle
-  role: SPYTMLAKE_USER_ROLE
-  databaseName: SPYTMLAKE_TEST
-  schema: PUBLIC
-  warehouse: COMPUTE_WH
-  # initialization-mode: never   # explicitly disable for Snowflake
+  active: false
+#  url: jdbc:snowflake://wr04231.eu-west-1.snowflakecomputing.com
+#  account: wr04231
+#  region: eu-west-1
+#  username: ${sf_test_user}    # From environment / gradle
+#  password: ${sf_test_pw}      # From environment / gradle
+#  role: SPYTMLAKE_USER_ROLE
+#  databaseName: SPYTMLAKE_TEST
+#  schema: PUBLIC
+#  warehouse: COMPUTE_WH
 
 logging:
   level:
