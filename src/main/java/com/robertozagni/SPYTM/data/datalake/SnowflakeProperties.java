@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 @Component @ConfigurationProperties(prefix = "datalake")
@@ -19,18 +20,19 @@ public class SnowflakeProperties implements BeanClassLoaderAware {
 
     private ClassLoader classLoader;
 
-    private @NotNull String url;    //  jdbc:snowflake://wr04231.eu-west-1.snowflakecomputing.com
+    private @NotNull boolean active = false;
+    private @NotNull String url;    //  jdbc:snowflake://<account>>.snowflakecomputing.com
     private String account;
     private String region;
-    private @NotNull String username;   // testappuser
-    private @NotNull String password; //: testAppUserAcc0unt
-    private @NotNull String role; // SPYTMLAKE_USER_ROLE
-    private String databaseName; // SPYTMLAKE_TEST
+    private @NotNull String username;
+    private @NotNull String password;
+    private @NotNull String role;
+    private String databaseName;
     private String schema;
     private String warehouse;
 
     @Override
-    public void setBeanClassLoader(ClassLoader classLoader) {
+    public void setBeanClassLoader(@Nullable ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
@@ -56,11 +58,12 @@ public class SnowflakeProperties implements BeanClassLoaderAware {
             }
             return JDBC_SNOWFLAKE_SCHEME + fullAccountName + ".snowflakecomputing.com/";
         }
-        throw new SnowflakeDataSourceCreationException("Failed to determine a suitable URL for Snowflake connection.", this);
+        throw new SnowflakeDataSourceCreationException(
+                "Failed to determine a suitable URL for Snowflake connection.", this);
     }
 
     private boolean isSnowflakeUrl() {
-        return url.startsWith(JDBC_SNOWFLAKE_SCHEME);
+        return url != null && url.startsWith(JDBC_SNOWFLAKE_SCHEME);
     }
 
     /**
@@ -83,7 +86,7 @@ public class SnowflakeProperties implements BeanClassLoaderAware {
 
 
     static class SnowflakeDataSourceCreationException extends RuntimeException {
-        @Getter private SnowflakeProperties snowflakeProperties;
+        @Getter private final SnowflakeProperties snowflakeProperties;
         public SnowflakeDataSourceCreationException(String message, SnowflakeProperties snowflakeProperties) {
             super(message);
             this.snowflakeProperties = snowflakeProperties;

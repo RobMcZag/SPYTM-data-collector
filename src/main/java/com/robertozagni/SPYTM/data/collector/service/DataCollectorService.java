@@ -58,7 +58,7 @@ public class DataCollectorService implements CommandLineRunner {
 
         Map<String, TimeSerie> timeSeries = downloadAndSave(downloadRequest);
 
-        if (snowflakeStorageService.isActive()) {
+        if (snowflakeStorageService.isEnabled()) {
             loadToDatalake(timeSeries);
         }
 

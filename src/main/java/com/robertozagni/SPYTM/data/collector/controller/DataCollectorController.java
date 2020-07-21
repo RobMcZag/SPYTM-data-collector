@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class DataCollectorController {
                 DownloadRequest.getDefaultQuoteType(),
                 DownloadRequest.getDefaultQuoteProvider(),
                 DownloadRequest.getDefaultDownloadSize(),
-                Collections.singletonList(symbol)
+                Arrays.asList(DownloadRequest.tokenize(symbol))
         );
 
         dataCollectorService.downloadAndSave(downloadRequest);
@@ -39,7 +40,7 @@ public class DataCollectorController {
                 DownloadRequest.getDefaultQuoteType(),
                 DownloadRequest.getDefaultQuoteProvider(),
                 DownloadSize.FULL,
-                Collections.singletonList(symbol)
+                Arrays.asList(DownloadRequest.tokenize(symbol))
         );
 
         dataCollectorService.downloadAndSave(downloadRequest);
