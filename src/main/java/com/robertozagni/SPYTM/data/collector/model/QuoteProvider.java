@@ -5,5 +5,6 @@ package com.robertozagni.SPYTM.data.collector.model;
  */
 public enum QuoteProvider {
     APLPHA_VANTAGE,
+    YAHOO_FINANCE,
     TEST_PROVIDER;
 }
