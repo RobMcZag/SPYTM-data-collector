@@ -9,10 +9,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class YFTimeSerieTest {
+public class YFv8TimeSerieTest {
     @Test
     void class_model_fits_json()  throws IOException {
-        YFTimeSerie timeSerie = YahooStockDownloaderTestHelper.loadSampleAAPL_YFTimeSerie();
+        YFv8TimeSerie timeSerie = YahooStockDownloaderTestHelper.loadSampleAAPL_YFv8TimeSerie();
 
         assertNotNull(timeSerie);
         assertNotNull(timeSerie.getChart());
@@ -20,7 +20,7 @@ public class YFTimeSerieTest {
         assertNotNull(timeSerie.getChart().getResult().get(0));
         assertNull(timeSerie.getChart().getError());
 
-        YFTimeSerie.YFStockResultMeta stockResultMeta = timeSerie.getChart().getResult().get(0).getMeta();
+        YFv8TimeSerie.YFStockResultMeta stockResultMeta = timeSerie.getChart().getResult().get(0).getMeta();
         assertNotNull(stockResultMeta);
         assertNotNull(stockResultMeta.getValidRanges());
         assertNotNull(stockResultMeta.getCurrentTradingPeriod());
@@ -38,12 +38,12 @@ public class YFTimeSerieTest {
         assertEquals(345479400, timestamps.get(0)); // [345479400, ...]
 
         assertNotNull(timeSerie.getChart().getResult().get(0).getEvents());
-        Map<Integer, YFTimeSerie.YFDividendEventData> dividendMap = timeSerie.getChart().getResult().get(0).getEvents().getDividends();
+        Map<Integer, YFv8TimeSerie.YFDividendEventData> dividendMap = timeSerie.getChart().getResult().get(0).getEvents().getDividends();
         assertNotNull(dividendMap);
         assertNotNull(dividendMap.get(1541687400));
         assertEquals(0.1825, dividendMap.get(1541687400).getAmount(), 0.001);
         assertEquals(1541687400, dividendMap.get(1541687400).getDate());
-        Map<Integer, YFTimeSerie.YFSplitData> splitMap = timeSerie.getChart().getResult().get(0).getEvents().getSplits();
+        Map<Integer, YFv8TimeSerie.YFSplitData> splitMap = timeSerie.getChart().getResult().get(0).getEvents().getSplits();
         assertNotNull(splitMap);
         assertNotNull(splitMap.get(1598880600));
         assertEquals(1598880600, splitMap.get(1598880600).getDate());
@@ -52,7 +52,7 @@ public class YFTimeSerieTest {
 
         assertNotNull(timeSerie.getChart().getResult().get(0).getIndicators());
         assertNotNull(timeSerie.getChart().getResult().get(0).getIndicators().getQuote());
-        YFTimeSerie.YFStockQuotes yfStockQuotes = timeSerie.getChart().getResult().get(0).getIndicators().getQuote().get(0);
+        YFv8TimeSerie.YFStockQuotes yfStockQuotes = timeSerie.getChart().getResult().get(0).getIndicators().getQuote().get(0);
         assertNotNull(yfStockQuotes);
         assertEquals(timestamps.size(), yfStockQuotes.getOpen().size());
         assertEquals(timestamps.size(), yfStockQuotes.getClose().size());
@@ -65,7 +65,7 @@ public class YFTimeSerieTest {
         assertEquals(BigDecimal.valueOf(0.1155133917927742), yfStockQuotes.getOpen().get(3));
 
         assertNotNull(timeSerie.getChart().getResult().get(0).getIndicators().getAdjclose());
-        YFTimeSerie.YFStockAdjCloses yfStockAdjCloses = timeSerie.getChart().getResult().get(0).getIndicators().getAdjclose().get(0);
+        YFv8TimeSerie.YFStockAdjCloses yfStockAdjCloses = timeSerie.getChart().getResult().get(0).getIndicators().getAdjclose().get(0);
         assertNotNull(yfStockAdjCloses);
         assertNotNull(yfStockAdjCloses.getAdjclose());
         // [ 0.10026576370000839, 0.09503454715013504, 0.08805947750806808, 0.09023918211460114, ...]

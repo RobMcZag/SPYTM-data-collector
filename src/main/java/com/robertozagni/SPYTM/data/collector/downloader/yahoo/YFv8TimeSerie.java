@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class YFTimeSerie {
+public class YFv8TimeSerie {
 
     @JsonProperty private YFChart chart;
 
