@@ -1,9 +1,6 @@
 package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 
-import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
-import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +61,7 @@ class YFv8StockDownloaderSpringTest {
                      "symbol=" + symbol +
                      "&period1=0" +
                      "&period2=999999999" +
-                     "&interval=1d" +
-                     "&crumb=" + YFv8StockDownloader.getCRUMB();   // CRUMB
+                     "&interval=1d";
 
         mockServer.expect(ExpectedCount.once(),
                 requestTo(new URI(url)))
