@@ -17,9 +17,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -73,5 +75,17 @@ class YFv8StockDownloaderSpringTest {
 
         Map<String, TimeSerie> download = downloader.download(downloadRequest);
         assertNotNull(download);
+        assertNotNull(download.get(symbol));
+        assertNotNull(download.get(symbol).getMetadata());
+        assertNotNull(download.get(symbol).getData());
+
+        assertEquals(symbol, download.get(symbol).getMetadata().getSymbol());
+        Map<String, DailyQuote> quoteMap = download.get(symbol).getData();
+        assertEquals(10076, quoteMap.size());
+        assertNotNull(quoteMap.get("2020-11-25"));
+        assertEquals(symbol, quoteMap.get("2020-11-25").getSymbol());
+        assertEquals(LocalDate.parse("2020-11-25"), quoteMap.get("2020-11-25").getDate());
+        assertEquals(115.55, quoteMap.get("2020-11-25").getQuote().getOpen(), 0.001);
+        assertEquals(1.0, quoteMap.get("2020-11-25").getSplitCoefficient(), 0.001);
     }
 }
