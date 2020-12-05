@@ -1,5 +1,6 @@
 package com.robertozagni.SPYTM.data.collector.service;
 
+import com.robertozagni.SPYTM.data.collector.downloader.yahoo.YFv8StockDownloader;
 import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.downloader.Downloader;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
@@ -47,6 +48,9 @@ public class DataDownloaderService {
 
             case APLPHA_VANTAGE:
                 return new AlphaVantageDownloader(restTemplate);
+
+            case YAHOO_FINANCE:
+                return new YFv8StockDownloader(restTemplate);
 
             default:
                 throw new IllegalArgumentException("Requested unknown quote provider:" + quoteProvider);
