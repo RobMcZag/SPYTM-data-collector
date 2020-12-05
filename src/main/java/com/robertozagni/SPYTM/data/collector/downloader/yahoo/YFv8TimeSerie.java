@@ -62,12 +62,18 @@ public class YFv8TimeSerie {
 
         }
 
+        /**
+         * Returns the mapping between Yahoo Finance granularity values and our Quote Types.
+         * @param dataGranularity the granularity of the timeserie from Yahoo
+         * @throws IllegalArgumentException if the granularity does not map to a Quote Type
+         * @return the QuoteType corresponding to the given granularity
+         */
         private QuoteType getQuoteType(String dataGranularity) {
             switch (dataGranularity) {
                 case "1d": return QuoteType.DAILY_ADJUSTED;
                 case "5d": return QuoteType.WEEKLY_ADJUSTED;
                 case "1mo": return QuoteType.MONTHLY_ADJUSTED;
-                default: return QuoteType.MONTHLY;  // "3mo","6mo","1y","2y","5y","10y","ytd","max"
+                default: throw new IllegalArgumentException();  // "3mo","6mo","1y","2y","5y","10y","ytd","max"
             }
         }
     }
@@ -131,13 +137,16 @@ public class YFv8TimeSerie {
      * @return a Model time serie with the data from the YF Time Serie
      */
     static public TimeSerie toModel(YFv8TimeSerie yfTimeSerie) {
-        TimeSerieMetadata metaData = yfTimeSerie.getChart().getResult().get(0).getMeta().toTimeSerieMetadata();
+        YFStockResult stockResult = yfTimeSerie.getChart().getResult().get(0);
+        TimeSerieMetadata metaData = stockResult.getMeta().toTimeSerieMetadata();
 
-        List<Integer> timestampList = yfTimeSerie.getChart().getResult().get(0).getTimestamp();
-        YFStockQuotes quotes = yfTimeSerie.getChart().getResult().get(0).getIndicators().getQuote().get(0);
-        YFStockAdjCloses adjCloses = yfTimeSerie.getChart().getResult().get(0).getIndicators().getAdjclose().get(0);
-        Map<Integer, YFDividendEventData> dividendsMap = yfTimeSerie.getChart().getResult().get(0).getEvents().getDividends();
-        Map<Integer, YFSplitData> splitsMap = yfTimeSerie.getChart().getResult().get(0).getEvents().getSplits();
+        List<Integer> timestampList = stockResult.getTimestamp();
+        YFStockQuotes quotes = stockResult.getIndicators().getQuote().get(0);
+        YFStockAdjCloses adjCloses = stockResult.getIndicators().getAdjclose().get(0);
+
+        YFEvents stockResultEvents = getEvents(stockResult);
+        Map<Integer, YFDividendEventData> dividendsMap = stockResultEvents.getDividends();
+        Map<Integer, YFSplitData> splitsMap = stockResultEvents.getSplits();
 
         Map<String, DailyQuote> quoteMap = new HashMap<>();
         for (int i=0; i < timestampList.size(); i++) {
@@ -171,6 +180,31 @@ public class YFv8TimeSerie {
         }
         return new TimeSerie(metaData, quoteMap);
 
+    }
+
+    /**
+     * Extracts and returns the events (spits and dividends) accounting for no data of any type.
+     * @param stockResult The results received by Yahoo
+     * @return The Events received or the empty containers for missing data.
+     */
+    private static YFEvents getEvents(YFStockResult stockResult) {
+        Map<Integer, YFDividendEventData> emptyDividendMap = new HashMap<>(); //events.getDividends();
+        Map<Integer, YFSplitData> emptySplitMap = new HashMap<>();   // events.getSplits();
+
+        YFEvents events = stockResult.getEvents();
+        if (events == null) {
+            events = new YFEvents();
+            events.setDividends(emptyDividendMap);
+            events.setSplits(emptySplitMap);
+        } else {
+            if (events.getDividends() == null) {
+                events.setDividends(emptyDividendMap);
+            }
+            if (events.getSplits() == null) {
+                events.setSplits(emptySplitMap);
+            }
+        }
+        return events;
     }
 
     private static Long getVolume(YFStockQuotes quotes, int i) throws NoQuoteException {
