@@ -6,9 +6,14 @@ import com.robertozagni.SPYTM.data.collector.model.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -65,15 +70,38 @@ public class YFv8TimeSerie {
         /**
          * Returns the mapping between Yahoo Finance granularity values and our Quote Types.
          * @param dataGranularity the granularity of the timeserie from Yahoo
-         * @throws IllegalArgumentException if the granularity does not map to a Quote Type
          * @return the QuoteType corresponding to the given granularity
+         * @throws IllegalArgumentException if the granularity does not map to a Quote Type
          */
-        private QuoteType getQuoteType(String dataGranularity) {
+        public static QuoteType getQuoteType(String dataGranularity) {
             switch (dataGranularity) {
                 case "1d": return QuoteType.DAILY_ADJUSTED;
                 case "5d": return QuoteType.WEEKLY_ADJUSTED;
                 case "1mo": return QuoteType.MONTHLY_ADJUSTED;
                 default: throw new IllegalArgumentException();  // "3mo","6mo","1y","2y","5y","10y","ytd","max"
+            }
+        }
+
+        /**
+         * Returns the mapping between a QuoteType and Yahoo granularity
+         * @param quoteType The quote type to get the YF granularity for
+         * @return The YF granularity string for the given QuoteType
+         * @throws IllegalArgumentException if the  Quote Type does not map to a granularity
+         */
+        public static String getGranularity(QuoteType quoteType) {
+            switch (quoteType) {
+                case DAILY:
+                case DAILY_ADJUSTED:
+                    return "1d";
+                case WEEKLY:
+                case WEEKLY_ADJUSTED:
+                    return "5d";
+                case MONTHLY:
+                case MONTHLY_ADJUSTED:
+                    return "1mo";
+                case INTRADAY:
+                    return "5m";    // 5 minutes
+                default: throw new IllegalArgumentException();  // should never happen ;)
             }
         }
     }

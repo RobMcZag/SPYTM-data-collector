@@ -9,12 +9,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -24,7 +24,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest
@@ -56,17 +55,9 @@ class YFv8StockDownloaderSpringTest {
                 Collections.singletonList(symbol)
         );
 
-        String url = YFv8StockDownloader.getBASE_URL_HTTP11() +
-                     YFv8StockDownloader.getPRICE_URL_TEMPLATE() +
-                     symbol +
-                     "?" +
-                     "symbol=" + symbol +
-                     "&period1=0" +
-                     "&period2=999999999" +
-                     "&interval=1d";
-
         mockServer.expect(ExpectedCount.once(),
-                requestTo(new URI(url)))
+                          MockRestRequestMatchers.anything()
+                )
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess()
                             .contentType(MediaType.APPLICATION_JSON)
