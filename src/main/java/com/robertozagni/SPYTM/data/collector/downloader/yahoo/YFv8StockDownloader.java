@@ -42,6 +42,7 @@ public class YFv8StockDownloader implements Downloader {
                     .queryParam("period1", 0)
                     .queryParam("period2", 999999999)
                     .queryParam("interval", "1d")
+                    .queryParam("events", "div,split")
                     ;
             String url = builder.toUriString();
 
@@ -49,7 +50,6 @@ public class YFv8StockDownloader implements Downloader {
             try {
                 YFv8TimeSerie data = restTemplate.getForObject(url, YFv8TimeSerie.class);
                 assert data != null;
-//                if (data.getMetadata() == null) { continue; }   // We have nothing to say for this symbol
                 result.put(symbol, YFv8TimeSerie.toModel(data));
 
             } catch (RestClientException e) {
