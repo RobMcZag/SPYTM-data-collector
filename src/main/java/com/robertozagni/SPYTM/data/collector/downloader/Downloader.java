@@ -1,10 +1,8 @@
 package com.robertozagni.SPYTM.data.collector.downloader;
 
 import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
-import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 
-import java.util.List;
 import java.util.Map;
 
 public interface Downloader {

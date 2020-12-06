@@ -1,6 +1,9 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.robertozagni.SPYTM.data.collector.model.*;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
+import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
+import com.robertozagni.SPYTM.data.collector.model.QuoteType;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +48,7 @@ class AlphaVantageDownloaderTest {
         verify(mockRestTemplate, times(msft.size())).getForObject(anyString(), eq(AVTimeSerie.class));
 
         assertEquals(1, timeSerieMap.keySet().size());
-        assertTrue(timeSerieMap.keySet().contains("MSFT"));
+        assertTrue(timeSerieMap.containsKey("MSFT"));
         assertEquals(timeSerieMap.get("MSFT"), msftAVTimeSerie.toModel());
     }
 
@@ -69,7 +72,7 @@ class AlphaVantageDownloaderTest {
         verify(mockRestTemplate, times(symbols.size())).getForObject(anyString(), eq(AVTimeSerie.class));
 
         assertEquals(1, timeSerieMap.keySet().size());
-        assertTrue(timeSerieMap.keySet().contains("MSFT"));
+        assertTrue(timeSerieMap.containsKey("MSFT"));
         assertEquals(timeSerieMap.get("MSFT"), msftAVTimeSerie.toModel());
     }
     @Test

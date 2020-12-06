@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 public class DownloadRequest {
     private static final @Getter QuoteType defaultQuoteType = QuoteType.DAILY_ADJUSTED;
-    private static final @Getter QuoteProvider defaultQuoteProvider = QuoteProvider.APLPHA_VANTAGE;
+    private static final @Getter QuoteProvider defaultQuoteProvider = QuoteProvider.YAHOO_FINANCE;
     private static final @Getter DownloadSize defaultDownloadSize = DownloadSize.LATEST;
 
     private final QuoteType quoteType;
