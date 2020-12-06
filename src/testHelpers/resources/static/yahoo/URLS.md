@@ -32,6 +32,14 @@ The above request will return all price data for ticker AAPL on a 1 day interval
 `https://query1.finance.yahoo.com/v8/finance/chart/AAPL?symbol=AAPL&period1=0&period2=9999999999&interval=1d&includePrePost=true`
 * **chart_v8_APPL_w_DIV_SPLIT.json**  
 `https://query1.finance.yahoo.com/v8/finance/chart/AAPL?symbol=AAPL&period1=0&period2=9999999999&interval=1d&includePrePost=true&events=div%2Csplit`
+* **chart_symbol_MLPD_not_found.json**
+`https://query2.finance.yahoo.com/v8/finance/chart/MLPD?symbol=MLPD&period1=0&period2=31556889864403199&interval=1d&events=div,split`  
+2020-12-06 12:31:41.237 ERROR 1047 --- [nio-8080-exec-4] c.r.S.d.c.d.yahoo.YFv8StockDownloader    : 
+  Error while attempting to download data from https://query2.finance.yahoo.com/v8/finance/chart/MLPD?symbol=MLPD&period1=0&period2=31556889864403199&interval=1d&events=div,split  
+2020-12-06 12:31:41.237 ERROR 1047 --- [nio-8080-exec-4] c.r.S.d.c.d.yahoo.YFv8StockDownloader    : 
+  org.springframework.web.client.HttpClientErrorException$NotFound: 404 Not Found: 
+  [{"chart":{"result":null,"error":{"code":"Not Found","description":"No data found, symbol may be delisted"}}}]
+
 
 ### Current quote and general stock info
 #### Example files
