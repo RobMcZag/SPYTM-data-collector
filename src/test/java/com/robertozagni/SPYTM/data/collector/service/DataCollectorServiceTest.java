@@ -71,7 +71,7 @@ public class DataCollectorServiceTest {
 
     @Test
     void parameters_and_symbols_are_parsed_and_passed() {
-        String[] args = {"DAILY_ADJUSTED", "MSFT", "AAPL", "APLPHA_VANTAGE"};
+        String[] args = {"DAILY_ADJUSTED", "MSFT", "AAPL", "ALPHA_VANTAGE"};
 
         DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 

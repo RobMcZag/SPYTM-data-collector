@@ -67,7 +67,7 @@ class CsvServiceTest {
 
     @Test
     void strategy_populates_bean_correctly() throws CsvDataTypeMismatchException {
-        String[] line = {"APLPHA_VANTAGE","DAILY_ADJUSTED","MSFT","2019-10-28","144.4","145.67","143.51","144.19","34912902","143.7002","0.0","1.0"};
+        String[] line = {"ALPHA_VANTAGE","DAILY_ADJUSTED","MSFT","2019-10-28","144.4","145.67","143.51","144.19","34912902","143.7002","0.0","1.0"};
         DailyQuote dailyQuote = strategy.populateNewBean(line);
         assertNotNull(dailyQuote);
         assertEquals(QuoteProvider.ALPHA_VANTAGE, dailyQuote.getProvider());
