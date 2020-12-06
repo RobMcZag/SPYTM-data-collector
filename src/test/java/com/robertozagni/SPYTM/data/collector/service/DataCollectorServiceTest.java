@@ -15,7 +15,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.Mockito.*;
 
 public class DataCollectorServiceTest {
@@ -51,8 +52,8 @@ public class DataCollectorServiceTest {
     }
 
     @Test
-    void dataSerie_and_symbols_are_parsed_and_passed() {
-        String[] args = {"DAILY_ADJUSTED", "MSFT", "AAPL"};
+    void parameters_and_symbols_are_parsed_and_passed() {
+        String[] args = {"DAILY_ADJUSTED", "MSFT", "AAPL", "APLPHA_VANTAGE"};
 
         DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
@@ -62,13 +63,24 @@ public class DataCollectorServiceTest {
     }
 
     @Test
-    void no_dataSerie_uses_default() {
+    void other_parameters_and_symbols_are_parsed_and_passed() {
+        String[] args = {"DAILY", "ENI", "AM", "YAHOO_FINANCE"};
+
+        DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
+
+        assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.YAHOO_FINANCE);
+        assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY);
+        assertIterableEquals(downloadConfig.getSymbols(), Arrays.asList("ENI", "AM"));
+    }
+
+    @Test
+    void no_parameters_use_default() {
         String[] args = {"MSFT", "AAPL", "XYZ"};
 
         DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
-        assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.APLPHA_VANTAGE);
-        assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
+        assertEquals(downloadConfig.getQuoteProvider(), DownloadRequest.getDefaultQuoteProvider());
+        assertEquals(downloadConfig.getQuoteType(), DownloadRequest.getDefaultQuoteType());
         assertIterableEquals(downloadConfig.getSymbols(), Arrays.asList("MSFT", "AAPL", "XYZ"));
 
     }
@@ -80,7 +92,7 @@ public class DataCollectorServiceTest {
         DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
         assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.TEST_PROVIDER);
-        assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
+        assertEquals(downloadConfig.getQuoteType(), DownloadRequest.getDefaultQuoteType());
 
     }
 
