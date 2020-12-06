@@ -1,12 +1,14 @@
 package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 
 import com.robertozagni.SPYTM.data.collector.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
@@ -15,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -32,17 +33,23 @@ class YFv8StockDownloaderSpringTest {
     @Autowired
     private RestTemplate restTemplate;
 
+    private ClientHttpRequestFactory originalRequestFactory;
     private MockRestServiceServer mockServer;
     private YFv8StockDownloader downloader;
 
     @BeforeEach
     void setup() {
+        originalRequestFactory = restTemplate.getRequestFactory();
         mockServer = MockRestServiceServer.createServer(restTemplate);
         downloader = new YFv8StockDownloader(restTemplate);
     }
+    @AfterEach
+    void resetRestTemplate() {
+        restTemplate.setRequestFactory(originalRequestFactory);
+    }
 
     @Test
-    void can_receive_mock_response() throws IOException, URISyntaxException {
+    void can_receive_mock_response() throws IOException {
         File file = ResourceUtils.getFile("classpath:static/yahoo/chart_v8_APPL_w_DIV_SPLIT.json");
         String content = new String(Files.readAllBytes(file.toPath()));
 
