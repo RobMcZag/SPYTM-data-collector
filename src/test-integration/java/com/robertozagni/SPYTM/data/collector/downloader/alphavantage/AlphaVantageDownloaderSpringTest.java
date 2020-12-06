@@ -69,7 +69,7 @@ public class AlphaVantageDownloaderSpringTest {
 
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 Collections.singletonList("MSFT")
         );

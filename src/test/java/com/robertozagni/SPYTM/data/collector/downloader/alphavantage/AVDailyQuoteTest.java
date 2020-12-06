@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AVDailyQuoteTest {
 
@@ -20,7 +20,7 @@ class AVDailyQuoteTest {
         AVDailyQuote sd = makeTestAVDailyQuote();
         DailyQuote tssd = sd.toTimeSerieStockData();
 
-        assertEquals(tssd.getProvider(), QuoteProvider.APLPHA_VANTAGE);
+        assertEquals(tssd.getProvider(), QuoteProvider.ALPHA_VANTAGE);
         assertEquals(tssd.getQuotetype(), QuoteType.DAILY_ADJUSTED);
         assertEquals(tssd.getSymbol(), TEST_SYMBOL_NAME);
         assertEquals(tssd.getDate(), sd.getDate());

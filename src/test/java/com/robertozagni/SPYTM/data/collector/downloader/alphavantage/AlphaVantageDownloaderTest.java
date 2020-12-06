@@ -39,7 +39,7 @@ class AlphaVantageDownloaderTest {
 
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 msft
         );
@@ -63,7 +63,7 @@ class AlphaVantageDownloaderTest {
 
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 symbols
         );
@@ -79,7 +79,7 @@ class AlphaVantageDownloaderTest {
     void return_empty_timeserie_when_null_is_passed_for_symbol() {
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 null
         );
@@ -92,7 +92,7 @@ class AlphaVantageDownloaderTest {
     void return_empty_timeserie_when_no_simbol_is_passed() {
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 new ArrayList<>()
         );
@@ -108,7 +108,7 @@ class AlphaVantageDownloaderTest {
 
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 Collections.singletonList("MSFT")
         );

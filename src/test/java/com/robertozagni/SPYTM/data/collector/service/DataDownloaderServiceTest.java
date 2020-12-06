@@ -31,7 +31,7 @@ class DataDownloaderServiceTest {
         assertNotNull(downloader);
 
         switch (DownloadRequest.getDefaultQuoteProvider()) {
-            case APLPHA_VANTAGE:
+            case ALPHA_VANTAGE:
                 assertTrue(downloader instanceof AlphaVantageDownloader);
                 break;
             case YAHOO_FINANCE:
@@ -43,7 +43,7 @@ class DataDownloaderServiceTest {
     }
     @Test
     void AV_downloader_is_used_if_AV_is_passed() {
-        Downloader downloader = dataDownloaderService.getDownloader(QuoteProvider.APLPHA_VANTAGE);
+        Downloader downloader = dataDownloaderService.getDownloader(QuoteProvider.ALPHA_VANTAGE);
 
         assertNotNull(downloader);
         assertTrue(downloader instanceof AlphaVantageDownloader);

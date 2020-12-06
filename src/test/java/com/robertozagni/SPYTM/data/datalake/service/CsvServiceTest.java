@@ -2,7 +2,9 @@ package com.robertozagni.SPYTM.data.datalake.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.*;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloaderTestHelper;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
@@ -68,7 +70,7 @@ class CsvServiceTest {
         String[] line = {"APLPHA_VANTAGE","DAILY_ADJUSTED","MSFT","2019-10-28","144.4","145.67","143.51","144.19","34912902","143.7002","0.0","1.0"};
         DailyQuote dailyQuote = strategy.populateNewBean(line);
         assertNotNull(dailyQuote);
-        assertEquals(QuoteProvider.APLPHA_VANTAGE, dailyQuote.getProvider());
+        assertEquals(QuoteProvider.ALPHA_VANTAGE, dailyQuote.getProvider());
         assertEquals(QuoteType.DAILY_ADJUSTED, dailyQuote.getQuotetype());
         assertEquals("MSFT", dailyQuote.getSymbol());
         assertEquals("2019-10-28", dailyQuote.getDate().toString());

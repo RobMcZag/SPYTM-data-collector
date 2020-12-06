@@ -4,7 +4,7 @@ package com.robertozagni.SPYTM.data.collector.model;
  * An enumeration listing the known Data Providers
  */
 public enum QuoteProvider {
-    APLPHA_VANTAGE,
+    ALPHA_VANTAGE,
     YAHOO_FINANCE,
-    TEST_PROVIDER;
+    TEST_PROVIDER
 }

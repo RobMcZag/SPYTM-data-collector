@@ -31,7 +31,7 @@ class SpytmDataCollectorApplicationTests {
 		when( mockTemplate.getForObject(anyString(), eq(AVTimeSerie.class)) )
 			  .thenReturn(makeEmptyTimeSerieData());
 
-		commandLineRunner.run("DAILY_ADJUSTED", "MSFT", "AAPL", QuoteProvider.APLPHA_VANTAGE.name());
+		commandLineRunner.run("DAILY_ADJUSTED", "MSFT", "AAPL", QuoteProvider.ALPHA_VANTAGE.name());
 
 		verify(mockTemplate, times(2)).getForObject(anyString(), eq(AVTimeSerie.class));
 	}

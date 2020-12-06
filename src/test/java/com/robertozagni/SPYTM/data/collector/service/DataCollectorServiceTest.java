@@ -37,7 +37,7 @@ public class DataCollectorServiceTest {
 
     @Test
     void download_and_storage_repository_are_invoked_the_right_number_of_times_for_AV() throws Exception {
-        String[] args = {"MSFT", "AAPL", "XYZ", QuoteProvider.APLPHA_VANTAGE.toString()};
+        String[] args = {"MSFT", "AAPL", "XYZ", QuoteProvider.ALPHA_VANTAGE.toString()};
         AVTimeSerie msftTimeSerie = AlphaVantageDownloaderTestHelper.loadSampleMSFT_AVTimeSerie();
 
         when(restTemplate.getForObject(anyString(), eq(AVTimeSerie.class))).thenReturn(msftTimeSerie);
@@ -75,7 +75,7 @@ public class DataCollectorServiceTest {
 
         DownloadRequest downloadConfig = DownloadRequest.parseArgs(args);
 
-        assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.APLPHA_VANTAGE);
+        assertEquals(downloadConfig.getQuoteProvider(), QuoteProvider.ALPHA_VANTAGE);
         assertEquals(downloadConfig.getQuoteType(), QuoteType.DAILY_ADJUSTED);
         assertIterableEquals(downloadConfig.getSymbols(), Arrays.asList("MSFT", "AAPL"));
     }

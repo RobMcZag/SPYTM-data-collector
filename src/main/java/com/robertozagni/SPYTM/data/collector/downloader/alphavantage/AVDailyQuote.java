@@ -2,9 +2,9 @@ package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.DailyQuote;
+import com.robertozagni.SPYTM.data.collector.model.Quote;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
-import com.robertozagni.SPYTM.data.collector.model.Quote;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -38,7 +38,7 @@ public class AVDailyQuote {
 
     public DailyQuote toTimeSerieStockData() {
         return DailyQuote.builder()
-                .provider(QuoteProvider.APLPHA_VANTAGE)
+                .provider(QuoteProvider.ALPHA_VANTAGE)
                 .quotetype(quotetype).symbol(symbol).date(date)  // Quote key
                 .quote(Quote.builder().open(open).high(high).low(low).close(close).volume(getVolume()).build())
                 .adjustedClose(adjustedClose)

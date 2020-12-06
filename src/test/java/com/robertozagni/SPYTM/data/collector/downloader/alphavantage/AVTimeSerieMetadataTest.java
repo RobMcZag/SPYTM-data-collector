@@ -5,7 +5,7 @@ import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AVTimeSerieMetadataTest {
 
@@ -15,7 +15,7 @@ class AVTimeSerieMetadataTest {
 
         TimeSerieMetadata tsmd = md.toTimeSerieMetadata();
 
-        assertEquals(QuoteProvider.APLPHA_VANTAGE, tsmd.getProvider());
+        assertEquals(QuoteProvider.ALPHA_VANTAGE, tsmd.getProvider());
         assertEquals(QuoteType.WEEKLY, tsmd.getQuotetype());
         assertEquals(md.getSymbol(), tsmd.getSymbol());
         assertEquals(md.getSeriesInfo(), tsmd.getDescription());
