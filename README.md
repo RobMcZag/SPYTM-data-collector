@@ -3,21 +3,23 @@
 
 # SPYTM-data-collector
 
-This is just a small Spring Boot application I wrote to brush off some rust from my hands-on 
-coding skills and to somehow organise the collection of data for my investment activities.  
+This is a small Spring Boot application I wrote to somehow organise the collection of data for my investment activities.  
 For the courious... SPYTM stands for SPY Trading Model.
 
 The basic idea of this application is to collect stock data from different available 
 data sources and store it for further use.
 
-The initial intended use of the downloaded data is to train a model, written in Python, 
-to predict future SPY prices from other price time-series, using Linear Regression.
-One very good relationships exists between the daily closing / half-day price 
-of Asian / European markets and the US markets as represented by SPY.  
-The basic idea is to exploit the fact that the Asian / European markets provide their
-closing / half-day time early enough to bet on the daily outcome of the US markets.     
+The initial intended uses of the downloaded data are:
 
-The python regression model will be available in another repo. ATM it is still unpublished. 
+* to power my investment reporting
+
+* to train a model, written in Python, to predict future SPY prices 
+  from other price time-series, using Linear Regression.  
+  One very good relationships exists between the daily closing / half-day price 
+  of Asian / European markets and the US markets as represented by SPY.  
+  The basic idea is to exploit the fact that the Asian / European markets provide their 
+  closing / half-day time early enough to bet on the daily outcome of the US markets.  
+  The python regression model will be available in another repo. ATM it is still unpublished. 
 
 ## Main featues
 * The data is collected through API calls, receiving JSON encoded data.
