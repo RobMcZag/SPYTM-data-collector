@@ -83,6 +83,7 @@ Yahoo quotes provide:
 
 * `dividend` values.  
   Dividend value is reported on ex-div date, zero in other dates.
+  Dividend values are adjusted for SPLITS, like quotes.
 
 * `split` ratios.  
   Split ratio is reported on ex-split date, one in other dates.
@@ -102,6 +103,7 @@ Alpha Vantage quotes provide:
 
 * `dividend` values.  
   Dividend value is reported on ex-div date, zero in other dates.
+  Dividend values are NOT adjusted for SPLITS, like quotes.
 
 * `split` ratios.  
   Split ratio is reported on ex-split date, one in other dates.
