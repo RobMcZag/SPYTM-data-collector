@@ -160,6 +160,13 @@ public class YFv8TimeSerie {
     }
 
     /**
+     * Converts this timeserie instance into the canonical SPYTM Model representation.
+     * @return a Model time serie with the data from this Yahoo Finance Time Serie
+     */
+    public TimeSerie toModel() {
+        return toModel(this);
+    }
+    /**
      * Converts an Yahoo Finance specific data structure into the canonical SPYTM Model representation.
      * @param yfTimeSerie a well formed YF Time Serie, i.e. with no nulls for data or metadata.
      * @return a Model time serie with the data from the YF Time Serie
