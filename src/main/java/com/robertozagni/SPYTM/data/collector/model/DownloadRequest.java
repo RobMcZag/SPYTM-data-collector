@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A request to download data for one or more symbols.
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 public class DownloadRequest {
     private static final @Getter QuoteType defaultQuoteType = QuoteType.DAILY_ADJUSTED;
-    private static final @Getter QuoteProvider defaultQuoteProvider = QuoteProvider.APLPHA_VANTAGE;
+    private static final @Getter QuoteProvider defaultQuoteProvider = QuoteProvider.YAHOO_FINANCE;
     private static final @Getter DownloadSize defaultDownloadSize = DownloadSize.LATEST;
 
     private final QuoteType quoteType;
@@ -55,7 +56,7 @@ public class DownloadRequest {
                 continue;
             } catch (IllegalArgumentException ignored) { }   // Not a download size
 
-            symbols.add(arg);                                // Then it's a symbol ! :)
+            symbols.add(arg.toUpperCase(Locale.ROOT)); // Then it's a symbol ! Make it Locale independent Uppercase :)
         }
         return new DownloadRequest(quoteType, quoteProvider, downloadSize, symbols);
     }
@@ -69,6 +70,7 @@ public class DownloadRequest {
     public static String[] tokenize(String tokenString) {
         tokenString = tokenString.replaceAll(",", " ");
         tokenString = tokenString.replaceAll(";", " ");
+        tokenString = tokenString.replaceAll(":", " ");
         return tokenString.split(" ");
     }
 

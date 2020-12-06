@@ -31,7 +31,7 @@ public class DataCollectorService implements CommandLineRunner {
 
     private final DataDownloaderService dataDownloaderService;
     private final TimeSerieStorageService timeSerieStorageService;
-    private SnowflakeStorageService snowflakeStorageService;
+    private final SnowflakeStorageService snowflakeStorageService;
 
     @Autowired
     public DataCollectorService(

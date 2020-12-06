@@ -12,7 +12,7 @@ data sources and store it for further use.
 
 The initial intended use of the downloaded data is to train a model, written in Python, 
 to predict future SPY prices from other price time-series, using Linear Regression.
-One remarkably good relationships exists between the daily closing / half-day price 
+One very good relationships exists between the daily closing / half-day price 
 of Asian / European markets and the US markets as represented by SPY.  
 The basic idea is to exploit the fact that the Asian / European markets provide their
 closing / half-day time early enough to bet on the daily outcome of the US markets.     
@@ -46,11 +46,67 @@ You can use those commands to create your local DB and app user.
 Get more in the [Flyway migrations README](src/main/resources/db/migration/README.md)
 * Tests are nicely organised :)
   * Unit tests are separated from Integration tests and each set can be run independently.  
-  The default if you just run the `test` task is to only run Unit tests.
-  * both Unit and Integration tests are run upon build and in CI
+    The default if you just run the `test` task is to only run Unit tests.  
+    If you run the `check` task, like when building, you get all tests run :)
+  * both Unit and Integration tests are run upon build and in CI,  
+    as they are part of the `check` task. 
   * a test source-set library holds static test data and helpers to make available 
-  that data to all the tests.  
+    that data to all the tests.  
 
+# Data providers
+At the moment there is code to download data from two providers:
+
+* YAHOO FINANCE - Using the undocumented V8 API from yahoo site,
+  that covers most stocks in the world. 
+  No codes, no limits. For now.
+  
+* ALPHA VANTAGE - A free to use provider with mostly US data.
+  The API requires obtaining and using a free API code;
+  the free API is limited to 5 requests per minute.
+
+Yahoo Finance is now the default provider, given the wider coverage, 
+absence of limits and API codes.
+The first version used Alpha Vantage as provider, and the general model
+of how the metadata is saved still reflects that.
+ 
+### YAHOO FINANCE Provider
+It uses the V8 version of Yahoo data API that is undocumented, but stable.
+It does not attempt to fake any cookie and or crumb.
+
+By default, we download the quotes with adjusted close, dividends and splits.
+Yahoo quotes provide:
+
+* `open`, `close`, `high`, `low` and `volume` values.  
+  They are always adjusted for SPLITS
+  
+* `adjusted close` values are adjusted both for SPLITS and DIVIDENDS
+
+* `dividend` values.  
+  Dividend value is reported on ex-div date, zero in other dates.
+  Dividend values are adjusted for SPLITS, like quotes.
+
+* `split` ratios.  
+  Split ratio is reported on ex-split date, one in other dates.
+
+### ALPHA VANTAGE Provider
+It uses Alpha Vantage API that is well documented.
+The only drawback is that the available data is more or less the US stocks
+plus a few other from German or Uk exchanges, but qith much inferior data quality.
+
+By default, we download the quotes with adjusted close, dividends and splits.
+Alpha Vantage quotes provide:
+
+* `open`, `close`, `high`, `low` and `volume` values.  
+  They are NOT adjusted for SPLITS, they are the historical quotes.
+
+* `adjusted close` values are adjusted both for SPLITS and DIVIDENDS
+
+* `dividend` values.  
+  Dividend value is reported on ex-div date, zero in other dates.
+  Dividend values are NOT adjusted for SPLITS, like quotes.
+
+* `split` ratios.  
+  Split ratio is reported on ex-split date, one in other dates.
 
 # Running the project
 If you want to use a real DB instead of the embedded H2, 
@@ -66,7 +122,7 @@ For more see below [Setting up a real DB](#DBsetup).
   `http://localhost:8080/h2-console`
 
 
-# <A id="DBsetup"></A> Setting up a real DB 
+# <A name="DBsetup" id="DBsetup"></A> Setting up a real DB 
 Below are the steps to set-up a Postgress DB instead of using the default in-memory H2.
 
 ## Postgres Setup

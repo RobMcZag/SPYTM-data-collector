@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 @Slf4j
 @RestController
 public class DataCollectorController {
@@ -22,12 +19,7 @@ public class DataCollectorController {
 
     @GetMapping("/download/{symbol}")
     public DownloadRequest download(@PathVariable String symbol) {
-        DownloadRequest downloadRequest = new DownloadRequest(
-                DownloadRequest.getDefaultQuoteType(),
-                DownloadRequest.getDefaultQuoteProvider(),
-                DownloadRequest.getDefaultDownloadSize(),
-                Arrays.asList(DownloadRequest.tokenize(symbol))
-        );
+        DownloadRequest downloadRequest = DownloadRequest.parseArgs(DownloadRequest.tokenize(symbol));
 
         dataCollectorService.downloadAndSave(downloadRequest);
 
@@ -36,12 +28,10 @@ public class DataCollectorController {
 
     @GetMapping("/downloadFull/{symbol}")
     public DownloadRequest downloadFull(@PathVariable String symbol) {
-        DownloadRequest downloadRequest = new DownloadRequest(
-                DownloadRequest.getDefaultQuoteType(),
-                DownloadRequest.getDefaultQuoteProvider(),
-                DownloadSize.FULL,
-                Arrays.asList(DownloadRequest.tokenize(symbol))
-        );
+        DownloadRequest downloadRequest =
+                DownloadRequest.parseArgs(
+                        DownloadRequest.tokenize(symbol+ "," + DownloadSize.FULL.name())
+                );
 
         dataCollectorService.downloadAndSave(downloadRequest);
 

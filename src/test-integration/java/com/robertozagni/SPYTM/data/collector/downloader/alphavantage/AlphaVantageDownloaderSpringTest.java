@@ -4,12 +4,14 @@ import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.ResourceUtils;
@@ -23,9 +25,11 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 
 @SpringBootTest
@@ -36,11 +40,17 @@ public class AlphaVantageDownloaderSpringTest {
 
     private MockRestServiceServer mockServer;
     private AlphaVantageDownloader downloader;
+    private ClientHttpRequestFactory originalRequestFactory;
 
     @BeforeEach
     void setup() {
+        originalRequestFactory = restTemplate.getRequestFactory();
         mockServer = MockRestServiceServer.createServer(restTemplate);
         downloader = new AlphaVantageDownloader(restTemplate);
+    }
+    @AfterEach
+    void resetRestTemplate() {
+        restTemplate.setRequestFactory(originalRequestFactory);
     }
 
     @Test
@@ -59,7 +69,7 @@ public class AlphaVantageDownloaderSpringTest {
 
         DownloadRequest downloadRequest = new DownloadRequest(
                 QuoteType.DAILY,
-                QuoteProvider.APLPHA_VANTAGE,
+                QuoteProvider.ALPHA_VANTAGE,
                 DownloadRequest.getDefaultDownloadSize(),
                 Collections.singletonList("MSFT")
         );

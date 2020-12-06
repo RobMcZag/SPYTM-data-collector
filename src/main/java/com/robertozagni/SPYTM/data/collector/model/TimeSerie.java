@@ -14,7 +14,6 @@ import java.util.Map;
  */
 @Data @AllArgsConstructor
 public class TimeSerie {
-    public static final DateTimeFormatter SIMPLE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /** The metadata for this TimeSerie */
     private TimeSerieMetadata metadata;

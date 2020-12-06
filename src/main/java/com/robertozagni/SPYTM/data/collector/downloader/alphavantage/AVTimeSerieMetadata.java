@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata.JsonPropertyName.*;
 import static com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AVTimeSerieMetadata.SeriesInfoText.*;
@@ -20,7 +23,7 @@ public class AVTimeSerieMetadata {
 
     public TimeSerieMetadata toTimeSerieMetadata() {
         return TimeSerieMetadata.builder()
-                .provider(QuoteProvider.APLPHA_VANTAGE)
+                .provider(QuoteProvider.ALPHA_VANTAGE)
                 .quotetype(getQuoteType())
                 .symbol(symbol)
                 .description(seriesInfo)

@@ -1,8 +1,9 @@
 package com.robertozagni.SPYTM.data.collector.service;
 
-import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.downloader.Downloader;
 import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantageDownloader;
+import com.robertozagni.SPYTM.data.collector.downloader.yahoo.YFv8StockDownloader;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,11 @@ public class DataDownloaderService {
             case TEST_PROVIDER:
                 throw new UnsupportedOperationException("No test provider defined at this time!");
 
-            case APLPHA_VANTAGE:
+            case ALPHA_VANTAGE:
                 return new AlphaVantageDownloader(restTemplate);
+
+            case YAHOO_FINANCE:
+                return new YFv8StockDownloader(restTemplate);
 
             default:
                 throw new IllegalArgumentException("Requested unknown quote provider:" + quoteProvider);

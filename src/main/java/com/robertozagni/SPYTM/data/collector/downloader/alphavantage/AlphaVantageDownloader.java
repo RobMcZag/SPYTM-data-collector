@@ -1,6 +1,9 @@
 package com.robertozagni.SPYTM.data.collector.downloader.alphavantage;
 
-import com.robertozagni.SPYTM.data.collector.model.*;
+import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
+import com.robertozagni.SPYTM.data.collector.model.DownloadSize;
+import com.robertozagni.SPYTM.data.collector.model.QuoteType;
+import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -8,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 

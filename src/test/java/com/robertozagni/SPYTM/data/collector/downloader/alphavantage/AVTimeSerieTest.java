@@ -24,7 +24,7 @@ class AVTimeSerieTest {
             DailyQuote quote = timeSerie.getData().get(tradeDate);
             AVDailyQuote avQuote = avTimeSerie.getAvQuotes().get(tradeDate);
 
-            assertEquals(quote.getProvider(), QuoteProvider.APLPHA_VANTAGE);
+            assertEquals(quote.getProvider(), QuoteProvider.ALPHA_VANTAGE);
             assertEquals(quote.getQuotetype(), avQuote.getQuotetype());
             assertEquals(quote.getSymbol(), avQuote.getSymbol());
             assertEquals(quote.getDate(), avQuote.getDate());
@@ -44,6 +44,7 @@ class AVTimeSerieTest {
 
     @Test
     void null_AVTimeSerie_should_throw_NullPointerException_when_convert_toModel() {
+        //noinspection ConstantConditions
         assertThrows(NullPointerException.class,
                 () -> AVTimeSerie.toModel(null));
     }
