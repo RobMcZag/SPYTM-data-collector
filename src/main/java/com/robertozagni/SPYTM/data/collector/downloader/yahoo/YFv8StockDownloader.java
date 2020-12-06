@@ -22,7 +22,6 @@ import java.util.Map;
 @Component
 public class YFv8StockDownloader implements Downloader {
 
-    private static final String BASE_URL_HTTP10 = "https://query1.finance.yahoo.com";  // HTTP/1.0
     private static final @Getter String BASE_URL_HTTP11 = "https://query2.finance.yahoo.com";  // HTTP/1.1
     private static final @Getter String PRICE_URL_TEMPLATE = "/v8/finance/chart/"; // "/v8/finance/chart/AAPL?symbol=AAPL&period1=0&period2=9999999999&interval=3mo";
 
