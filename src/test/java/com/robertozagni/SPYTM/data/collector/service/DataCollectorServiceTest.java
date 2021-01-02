@@ -8,6 +8,7 @@ import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
 import com.robertozagni.SPYTM.data.collector.model.QuoteProvider;
 import com.robertozagni.SPYTM.data.collector.model.QuoteType;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.repository.DailyQuoteRepository;
 import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.*;
 public class DataCollectorServiceTest {
 
     @Mock RestTemplate restTemplate;
+    @Mock DailyQuoteRepository dailyQuoteRepository;
+    @Mock DailyQuoteUpdateService dailyQuoteUpdateService;
     @Mock TimeSerieStorageService timeSerieStorageService;
     @Mock SnowflakeStorageService snowflakeStorageService;
     private DataCollectorService dataCollectorService;
@@ -32,7 +35,8 @@ public class DataCollectorServiceTest {
     void init() {
         MockitoAnnotations.initMocks(this);
         DataDownloaderService dataDownloaderService = new DataDownloaderService(restTemplate);
-        dataCollectorService = new DataCollectorService(dataDownloaderService, timeSerieStorageService, snowflakeStorageService);
+        dailyQuoteUpdateService = new DailyQuoteUpdateService(dailyQuoteRepository, dataDownloaderService, timeSerieStorageService);
+        dataCollectorService = new DataCollectorService(dailyQuoteUpdateService, snowflakeStorageService);
     }
 
     @Test

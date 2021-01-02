@@ -1,13 +1,14 @@
 package com.robertozagni.SPYTM.data.collector.service;
 
-import com.robertozagni.SPYTM.data.collector.model.DownloadRequest;
-import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import com.robertozagni.SPYTM.data.datalake.service.SnowflakeStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,17 +30,14 @@ import java.util.Map;
 @Service
 public class DataCollectorService implements CommandLineRunner {
 
-    private final DataDownloaderService dataDownloaderService;
-    private final TimeSerieStorageService timeSerieStorageService;
+    private final DailyQuoteUpdateService dailyQuoteUpdateService;
     private final SnowflakeStorageService snowflakeStorageService;
 
     @Autowired
     public DataCollectorService(
-            DataDownloaderService dataDownloaderService,
-            TimeSerieStorageService timeSerieStorageService,
+            DailyQuoteUpdateService dailyQuoteUpdateService,
             SnowflakeStorageService snowflakeStorageService) {
-        this.dataDownloaderService = dataDownloaderService;
-        this.timeSerieStorageService = timeSerieStorageService;
+        this.dailyQuoteUpdateService = dailyQuoteUpdateService;
         this.snowflakeStorageService = snowflakeStorageService;
     }
 
@@ -54,38 +52,36 @@ public class DataCollectorService implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        DownloadRequest downloadRequest = DownloadRequest.parseArgs(args);
+        List<DownloadRequest> downloadRequestList = new ArrayList<>();
+        if (args.length > 0) {
+            downloadRequestList.add( DownloadRequest.parseArgs(args) );
+        } else {
+            downloadRequestList.add(
+                dailyQuoteUpdateService.updateDailyQuotes(
+                    QuoteProvider.YAHOO_FINANCE,
+                    QuoteType.DAILY_ADJUSTED,
+                    DownloadSize.LATEST)
+            );
+//            downloadRequestList.add(
+//                dailyQuoteUpdateService.updateDailyQuotes(
+//                    QuoteProvider.ALPHA_VANTAGE,
+//                    QuoteType.DAILY_ADJUSTED,
+//                    DownloadSize.LATEST)
+//            );
+        }
 
-        Map<String, TimeSerie> timeSeries = downloadAndSave(downloadRequest);
+        for (DownloadRequest downloadRequest: downloadRequestList) {
+            Map<String, TimeSerie> timeSeries = downloadAndSave(downloadRequest);
 
-        if (snowflakeStorageService.isEnabled()) {
-            loadToDatalake(timeSeries);
+            if (snowflakeStorageService.isEnabled()) {
+                loadToDatalake(timeSeries);
+            }
         }
 
     }
 
     public Map<String, TimeSerie> downloadAndSave(DownloadRequest downloadRequest) {
-        Map<String, TimeSerie> timeSeries = dataDownloaderService.downloadQuotes(downloadRequest);
-        timeSeries.values().forEach(
-                (TimeSerie serie) ->
-                    log.info(String.format("Downloaded %d %s quotes for %s from %s!",
-                            serie.getData().size(),
-                            serie.getMetadata().getQuotetype(),
-                            serie.getMetadata().getSymbol(),
-                            serie.getMetadata().getProvider()) )
-        );
-
-        timeSeries.values().forEach(
-                (TimeSerie serie) -> {
-                    timeSerieStorageService.save(serie);
-                    log.info(String.format("Saved in local DB %d %s quotes for %s from %s!",
-                            serie.getData().size(),
-                            serie.getMetadata().getQuotetype(),
-                            serie.getMetadata().getSymbol(),
-                            serie.getMetadata().getProvider()) );
-                }
-        );
-        return timeSeries;
+        return dailyQuoteUpdateService.downloadAndSave(downloadRequest);
     }
 
     public void loadToDatalake(Map<String, TimeSerie> timeSeries) {
