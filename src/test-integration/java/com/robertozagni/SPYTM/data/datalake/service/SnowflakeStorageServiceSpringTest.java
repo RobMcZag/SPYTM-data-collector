@@ -24,7 +24,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
+@SpringBootTest(args = {"TEST"} )
 class SnowflakeStorageServiceSpringTest {
 
     private final SnowflakeStorageService snowflakeStorageService;

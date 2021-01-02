@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(args = {"TEST"} )
 class YFv8StockDownloaderIntegrationTest {
 
     @Autowired
