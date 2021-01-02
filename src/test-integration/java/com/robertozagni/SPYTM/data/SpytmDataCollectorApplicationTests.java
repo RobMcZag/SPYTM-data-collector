@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(args = {"TEST"} )
 class SpytmDataCollectorApplicationTests {
 
 	@MockBean

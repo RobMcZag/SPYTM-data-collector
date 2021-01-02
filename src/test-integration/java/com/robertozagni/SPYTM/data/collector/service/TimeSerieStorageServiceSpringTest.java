@@ -4,7 +4,6 @@ import com.robertozagni.SPYTM.data.collector.downloader.alphavantage.AlphaVantag
 import com.robertozagni.SPYTM.data.collector.model.TimeSerie;
 import com.robertozagni.SPYTM.data.collector.model.TimeSerieMetadata;
 import com.robertozagni.SPYTM.data.collector.repository.TimeSerieMetadataRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +13,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(args = {"TEST"} )
 public class TimeSerieStorageServiceSpringTest {
 
     @MockBean DailyQuoteStorageService mockDailyQuoteStorageService;

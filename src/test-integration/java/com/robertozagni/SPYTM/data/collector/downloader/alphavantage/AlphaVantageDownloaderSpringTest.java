@@ -32,7 +32,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 
-@SpringBootTest
+@SpringBootTest(args = {"TEST"} )
 public class AlphaVantageDownloaderSpringTest {
 
     @Autowired
