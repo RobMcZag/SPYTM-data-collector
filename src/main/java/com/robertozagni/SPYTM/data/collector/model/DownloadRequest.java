@@ -56,7 +56,9 @@ public class DownloadRequest {
                 continue;
             } catch (IllegalArgumentException ignored) { }   // Not a download size
 
-            symbols.add(arg.toUpperCase(Locale.ROOT)); // Then it's a symbol ! Make it Locale independent Uppercase :)
+            if(! arg.equalsIgnoreCase("TEST")) {
+                symbols.add(arg.toUpperCase(Locale.ROOT)); // Then it's a symbol ! Make it Locale independent Uppercase :)
+            }
         }
         return new DownloadRequest(quoteType, quoteProvider, downloadSize, symbols);
     }
