@@ -12,7 +12,7 @@ import java.util.List;
 @Data @AllArgsConstructor @Builder
 public class OptionChain {
     /** The undelying symbol this option chain is about. */
-    private String symbol;
+    private String underlyingSymbol;
 
     /** The expiration date this option chain is about. */
     private LocalDate expirationDate;
@@ -21,11 +21,11 @@ public class OptionChain {
      * The id of this option chain.
      * @return the id for this option chain.
      */
-    private OptionChainId getId() { return new OptionChainId(symbol,expirationDate); }
+    private OptionChainId getId() { return new OptionChainId(underlyingSymbol,expirationDate); }
 
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class OptionChainId implements Serializable {
-        private String symbol;
+        private String underlyingSymbol;
         private LocalDate expirationDate;
     }
 
@@ -37,6 +37,6 @@ public class OptionChain {
     private List<LocalDate> expirationDates;
     private List<Double> strikes;
 
-    private List<OptionContract> optionQuotes;
+    private List<OptionContract> optionContracts;
 
 }

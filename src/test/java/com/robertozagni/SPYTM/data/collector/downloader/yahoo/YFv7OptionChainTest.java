@@ -72,12 +72,17 @@ class YFv7OptionChainTest {
     @Test
     void to_model_generate_correct_objects() throws IOException {
         YFv7OptionChain yfOptionChain = YahooStockDownloaderTestHelper.loadSampleSPY_YFv7OptionChain();
+        YFv7OptionChain.YFOptionChainResult yfOptionChainResult = yfOptionChain.getOptionChain().getResult().get(0);
 
         OptionChain optionChain = yfOptionChain.toModel();
         assertNotNull(optionChain);
-        assertEquals("SPY", optionChain.getSymbol());
+        assertEquals("SPY", optionChain.getUnderlyingSymbol());
         assertEquals(LocalDate.parse("2021-01-04"), optionChain.getExpirationDate());
         assertIterableEquals(expectedExpirationDates(), optionChain.getExpirationDates());
+        assertIterableEquals(yfOptionChainResult.getStrikes(), optionChain.getStrikes());
+
+        // Underlying info & Quote
+        // OoptionContract & Quotes
     }
 
     @Test

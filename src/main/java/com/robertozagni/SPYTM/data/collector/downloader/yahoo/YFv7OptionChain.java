@@ -2,13 +2,12 @@ package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.robertozagni.SPYTM.data.collector.model.OptionChain;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import lombok.*;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,25 +130,158 @@ public class YFv7OptionChain {
     public OptionChain toModel() {
         return toModel(this);
     }
-    public OptionChain toModel(YFv7OptionChain yfOptionChain) {
+    public static OptionChain toModel(YFv7OptionChain yfOptionChain) {
+        YFOptionChainResult yfOptionChainResult = getYfOptionChainResult(yfOptionChain);
+
+        YFOptionExpiration yfOptionExpiration = getYfOptionExpiration(yfOptionChainResult);
+
+        YFOptionUnderlying yfOptionUnderlying = yfOptionChainResult.getQuote();
+
+        LocalDate quoteDate = dateOfEpochSecond( yfOptionUnderlying.getRegularMarketTime() +
+                                                 yfOptionUnderlying.getGmtOffSetMilliseconds() / 1000 );
+
+        List<OptionContract> calls = toModel(   yfOptionChainResult.getUnderlyingSymbol(),
+                                                dateOfEpochSecond(yfOptionExpiration.getExpirationDate()),
+                                                OptionContract.OptionType.CALL,
+                                                quoteDate,
+                                                yfOptionExpiration.getCalls()   );
+        List<OptionContract> puts = toModel(   yfOptionChainResult.getUnderlyingSymbol(),
+                                                dateOfEpochSecond(yfOptionExpiration.getExpirationDate()),
+                                                OptionContract.OptionType.PUT,
+                                                quoteDate,
+                                                yfOptionExpiration.getPuts()   );
+
+        ArrayList<OptionContract> optionQuotes = new ArrayList<>(calls);
+        optionQuotes.addAll(puts);
+
+        return OptionChain.builder()
+                .underlyingSymbol(yfOptionChainResult.getUnderlyingSymbol())
+                .expirationDate(dateOfEpochSecond(yfOptionExpiration.getExpirationDate()))
+                .underlyingInfo(toModel(yfOptionUnderlying, quoteDate))
+                .expirationDates(dateOfEpochSecond(yfOptionChainResult.getExpirationDates()))
+                .strikes(yfOptionChainResult.getStrikes())
+                .optionContracts(optionQuotes)
+                .build();
+    }
+
+    private static YFOptionChainResult getYfOptionChainResult(YFv7OptionChain yfOptionChain) {
         List<YFOptionChainResult> yfOptionChainResults = yfOptionChain.getOptionChain().getResult();
         assert yfOptionChainResults.size() == 1;
-        YFOptionChainResult yfOptionChainResult = yfOptionChainResults.get(0);
-
+        return yfOptionChainResults.get(0);
+    }
+    private static YFOptionExpiration getYfOptionExpiration(YFOptionChainResult yfOptionChainResult) {
         List<YFOptionExpiration> yfOptionExpirations = yfOptionChainResult.getOptions();
         assert yfOptionExpirations.size() == 1;
-        YFOptionExpiration yfOptionExpiration = yfOptionExpirations.get(0);
+        return yfOptionExpirations.get(0);
+    }
 
-        OptionChain optionChain = OptionChain.builder()
-                .symbol(yfOptionChainResult.getUnderlyingSymbol())
-                .expirationDate(dateOfEpochSecond(yfOptionExpiration.getExpirationDate()))
-                .underlyingInfo(null)   // TODO
-                .expirationDates(dateOfEpochSecond(yfOptionChainResult.getExpirationDates()))
-                .strikes(null)          // TODO
-                .optionQuotes(null)     // TODO
+
+    protected static List<OptionContract> toModel(    String underlyingSymbol,
+                                                    LocalDate expirationDate,
+                                                    OptionContract.OptionType type,
+                                                    LocalDate quoteDate,
+                                                    List<YFOptionQuote> options) {
+
+        List<OptionContract> contracts = new ArrayList<>();
+
+        for (YFOptionQuote yfOptionQuote : options) {
+            OptionQuote optionQuote = OptionQuote.builder()
+                    .contractSymbol(yfOptionQuote.getContractSymbol())
+                    .quoteDate(quoteDate)
+                    .bid(yfOptionQuote.getBid())
+                    .ask(yfOptionQuote.getAsk())
+                    .lastTradeDate(dateTimeOfEpochSecond(yfOptionQuote.getLastTradeDate()))
+                    .lastPrice(yfOptionQuote.getLastPrice())
+                    .volume(yfOptionQuote.getVolume())
+                    .openInterest(yfOptionQuote.getOpenInterest())
+                    .change(yfOptionQuote.getChange())
+                    .percentChange(yfOptionQuote.getPercentChange())
+                    .inTheMoney(yfOptionQuote.getInTheMoney())
+                    .impliedVolatility(yfOptionQuote.getImpliedVolatility())
+                    .build();
+
+            OptionContract optionContract = OptionContract.builder()
+                    .contractSymbol(yfOptionQuote.getContractSymbol())
+                    .underlyingSymbol(underlyingSymbol)
+                    .expiration(expirationDate)
+                    .optionType(type)
+                    .strike(yfOptionQuote.getStrike())
+                    .currency(yfOptionQuote.getCurrency())
+                    .contractSize(yfOptionQuote.getContractSize())
+                    .quotes(Collections.singletonList(optionQuote))
+                    .build();
+
+            contracts.add(optionContract);
+        }
+        return contracts;
+    }
+
+    protected static UnderlyingInfo toModel(YFOptionUnderlying yfOptionUnderlying, LocalDate quoteDate) {
+        UnderlyingQuote underlyingQuote = UnderlyingQuote.builder()
+                .symbol(yfOptionUnderlying.getSymbol())
+                .quoteDate(quoteDate)
+                .bid(yfOptionUnderlying.getBid())
+                .ask(yfOptionUnderlying.getAsk())
+                .bidSize(yfOptionUnderlying.getBidSize())
+                .askSize(yfOptionUnderlying.getAskSize())
+                .marketCap(yfOptionUnderlying.getMarketCap())
+                .regularMarketChange(yfOptionUnderlying.getRegularMarketChange())
+                .regularMarketChangePercent(yfOptionUnderlying.getRegularMarketChangePercent())
+                .regularMarketTime(dateTimeOfEpochSecond(yfOptionUnderlying.getRegularMarketTime()
+                                                            + yfOptionUnderlying.getGmtOffSetMilliseconds() / 1000) )
+                .regularMarketPrice(yfOptionUnderlying.getRegularMarketPrice())
+                .regularMarketDayHigh(yfOptionUnderlying.getRegularMarketDayHigh())
+                .regularMarketDayRange(yfOptionUnderlying.getRegularMarketDayRange())
+                .regularMarketDayLow(yfOptionUnderlying.getRegularMarketDayLow())
+                .regularMarketVolume(yfOptionUnderlying.getRegularMarketVolume())
+                .regularMarketPreviousClose(yfOptionUnderlying.getRegularMarketPreviousClose())
+                .regularMarketOpen(yfOptionUnderlying.getRegularMarketOpen())
+                .postMarketChangePercent(yfOptionUnderlying.postMarketChangePercent)
+                .postMarketTime(dateTimeOfEpochSecond(yfOptionUnderlying.getPostMarketTime()
+                                                            + yfOptionUnderlying.getGmtOffSetMilliseconds() / 1000) )
+                .postMarketPrice(yfOptionUnderlying.getPostMarketPrice())
+                .postMarketChange(yfOptionUnderlying.getPostMarketChange())
+                .averageDailyVolume3Month(yfOptionUnderlying.getAverageDailyVolume3Month())
+                .averageDailyVolume10Day(yfOptionUnderlying.getAverageDailyVolume10Day())
+                .fiftyDayAverage(yfOptionUnderlying.getFiftyDayAverage())
+                .fiftyDayAverageChange(yfOptionUnderlying.fiftyDayAverageChange)
+                .fiftyDayAverageChangePercent(yfOptionUnderlying.getFiftyDayAverageChangePercent())
+                .fiftyTwoWeekLowChange(yfOptionUnderlying.getFiftyTwoWeekLowChange())
+                .fiftyTwoWeekLowChangePercent(yfOptionUnderlying.getFiftyTwoWeekLowChangePercent())
+                .fiftyTwoWeekRange(yfOptionUnderlying.getFiftyTwoWeekRange())
+                .fiftyTwoWeekHighChange(yfOptionUnderlying.getFiftyTwoWeekHighChange())
+                .fiftyTwoWeekHighChangePercent(yfOptionUnderlying.getFiftyTwoWeekHighChangePercent())
+                .fiftyTwoWeekLow(yfOptionUnderlying.getFiftyTwoWeekLow())
+                .fiftyTwoWeekHigh(yfOptionUnderlying.getFiftyTwoWeekHigh())
+                .ytdReturn(yfOptionUnderlying.getYtdReturn())
+                .trailingThreeMonthReturns(yfOptionUnderlying.getTrailingThreeMonthReturns())
+                .trailingThreeMonthNavReturns(yfOptionUnderlying.getTrailingThreeMonthNavReturns())
+                .twoHundredDayAverage(yfOptionUnderlying.getTwoHundredDayAverage())
+                .twoHundredDayAverageChange(yfOptionUnderlying.getTwoHundredDayAverageChange())
+                .twoHundredDayAverageChangePercent(yfOptionUnderlying.getTwoHundredDayAverageChangePercent())
                 .build();
 
-        return optionChain;
+        return UnderlyingInfo.builder()
+                .symbol(yfOptionUnderlying.getSymbol())
+                .shortName(yfOptionUnderlying.getShortName())
+                .longName(yfOptionUnderlying.getLongName())
+                .quoteType(yfOptionUnderlying.getQuoteType())
+                .currency(yfOptionUnderlying.getCurrency())
+                .region(yfOptionUnderlying.getRegion())
+                .language(yfOptionUnderlying.getLanguage())
+                .market(yfOptionUnderlying.getMarket())
+                .sharesOutstanding(yfOptionUnderlying.getSharesOutstanding())
+                .quoteSourceName(yfOptionUnderlying.getQuoteSourceName())
+                .firstTradeDateMilliseconds(yfOptionUnderlying.getFirstTradeDateMilliseconds())
+                .fullExchangeName(yfOptionUnderlying.getFullExchangeName())
+                .exchange(yfOptionUnderlying.getExchange())
+                .marketState(yfOptionUnderlying.getMarketState())
+                .exchangeTimezoneName(yfOptionUnderlying.getExchangeTimezoneName())
+                .exchangeTimezoneShortName(yfOptionUnderlying.getExchangeTimezoneShortName())
+                .exchangeDataDelayedBy(yfOptionUnderlying.getExchangeDataDelayedBy())
+                .gmtOffSetMilliseconds(yfOptionUnderlying.getGmtOffSetMilliseconds())
+                .underlyingQuotes(Collections.singletonList(underlyingQuote))
+                .build();
     }
 
 
@@ -162,5 +294,12 @@ public class YFv7OptionChain {
     public static LocalDate dateOfEpochSecond(Long seconds, ZoneId zone) {
         if (zone == null) { zone = ZoneOffset.UTC; }
         return Instant.ofEpochSecond(seconds).atZone(zone).toLocalDate();
+    }
+    public static LocalDateTime dateTimeOfEpochSecond(Long seconds) {
+        return dateTimeOfEpochSecond(seconds, ZoneOffset.UTC);
+    }
+    public static LocalDateTime dateTimeOfEpochSecond(Long seconds, ZoneId zone) {
+        if (zone == null) { zone = ZoneOffset.UTC; }
+        return Instant.ofEpochSecond(seconds).atZone(zone).toLocalDateTime();
     }
 }

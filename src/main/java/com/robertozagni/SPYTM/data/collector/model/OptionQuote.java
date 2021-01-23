@@ -11,18 +11,19 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class OptionQuote {
 
-    @Id @Column(length = 30) private String symbol;
-    @Id private LocalDate date;     // @Temporal(TemporalType.DATE)
+    @Id @Column(length = 30) private String contractSymbol;
+    @Id private LocalDate quoteDate;     // @Temporal(TemporalType.DATE)
 
     @Data @NoArgsConstructor @AllArgsConstructor @Builder
     public static class OptionQuoteId implements Serializable {
-        private String symbol;
-        private LocalDate date;
+        private String contractSymbol;
+        private LocalDate quoteDate;
     }
     public OptionQuote.OptionQuoteId getId() {
-        return new OptionQuote.OptionQuoteId(symbol, date);
+        return new OptionQuote.OptionQuoteId(contractSymbol, quoteDate);
     }
 
     private Boolean inTheMoney; //true
