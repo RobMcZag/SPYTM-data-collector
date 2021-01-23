@@ -52,7 +52,7 @@ public class YFv7OptionChain {
         @JsonProperty private String contractSize; //"REGULAR",
         @JsonProperty private Integer expiration; //1609718400,
         @JsonProperty private Integer lastTradeDate; //1608747716,
-        @JsonProperty private Double impliedVolatility; // 2.49219126953125,
+        @JsonProperty private Double impliedVolatility; // 2.49219126953125, This is a %
         @JsonProperty private Boolean inTheMoney; //true
     }
 
@@ -64,7 +64,7 @@ public class YFv7OptionChain {
         @JsonProperty private String quoteSourceName; //"Nasdaq Real Time Price",
         @JsonProperty private Boolean triggerable;//true,
         @JsonProperty private String currency;//"USD",
-        @JsonProperty private Long firstTradeDateMilliseconds;//728317800000,
+        @JsonProperty private Long firstTradeDateMilliseconds;//728317800000, UTC: Fri Jan 29 1993 14:30:00 // EST: Fri Jan 29 1993 09:30:00
         @JsonProperty private Integer priceHint;//2,
         @JsonProperty private Double postMarketChangePercent;//0.0374121,
         @JsonProperty private Integer postMarketTime;//1609462778,
@@ -116,7 +116,7 @@ public class YFv7OptionChain {
         @JsonProperty private String messageBoardId;//"finmb_6160262",
         @JsonProperty private String exchangeTimezoneName;//"America/New_York",
         @JsonProperty private String exchangeTimezoneShortName;//"EST",
-        @JsonProperty private Integer gmtOffSetMilliseconds;//-18000000,
+        @JsonProperty private Integer gmtOffSetMilliseconds;//-18 000 000,
         @JsonProperty private String market;//"us_market",
         @JsonProperty private Boolean esgPopulated;//false,
         @JsonProperty private String symbol;//"SPY"
