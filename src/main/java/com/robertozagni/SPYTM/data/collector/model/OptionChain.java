@@ -34,7 +34,7 @@ public class OptionChain {
      */
     private UnderlyingInfo underlyingInfo;
 
-    private List<Integer> expirationDates;
+    private List<LocalDate> expirationDates;
     private List<Double> strikes;
 
     private List<OptionContract> optionQuotes;

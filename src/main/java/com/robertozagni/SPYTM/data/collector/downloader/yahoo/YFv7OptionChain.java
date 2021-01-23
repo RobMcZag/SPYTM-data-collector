@@ -2,9 +2,15 @@ package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.robertozagni.SPYTM.data.collector.model.OptionChain;
 import lombok.*;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data @Builder @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,7 +28,7 @@ public class YFv7OptionChain {
     @JsonIgnoreProperties(ignoreUnknown=true)
     public static class YFOptionChainResult {
         @JsonProperty private String underlyingSymbol;
-        @JsonProperty private List<Integer> expirationDates;
+        @JsonProperty private List<Long> expirationDates;
         @JsonProperty private List<Double> strikes;
         @JsonProperty private Boolean hasMiniOptions;
         @JsonProperty private YFOptionUnderlying quote;
@@ -31,7 +37,7 @@ public class YFv7OptionChain {
 
     @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class YFOptionExpiration {
-        @JsonProperty private Integer expirationDate; // 1609718400,
+        @JsonProperty private Long expirationDate; // 1609718400,
         @JsonProperty private Boolean hasMiniOptions;
         @JsonProperty private List<YFOptionQuote> calls;
         @JsonProperty private List<YFOptionQuote> puts;
@@ -50,8 +56,8 @@ public class YFv7OptionChain {
         @JsonProperty private Double bid; // 128.83,
         @JsonProperty private Double ask; //129.35,
         @JsonProperty private String contractSize; //"REGULAR",
-        @JsonProperty private Integer expiration; //1609718400,
-        @JsonProperty private Integer lastTradeDate; //1608747716,
+        @JsonProperty private Long expiration; //1609718400,
+        @JsonProperty private Long lastTradeDate; //1608747716,
         @JsonProperty private Double impliedVolatility; // 2.49219126953125, This is a %
         @JsonProperty private Boolean inTheMoney; //true
     }
@@ -67,12 +73,12 @@ public class YFv7OptionChain {
         @JsonProperty private Long firstTradeDateMilliseconds;//728317800000, UTC: Fri Jan 29 1993 14:30:00 // EST: Fri Jan 29 1993 09:30:00
         @JsonProperty private Integer priceHint;//2,
         @JsonProperty private Double postMarketChangePercent;//0.0374121,
-        @JsonProperty private Integer postMarketTime;//1609462778,
+        @JsonProperty private Long postMarketTime;//1609462778,
         @JsonProperty private Double postMarketPrice;//374.39,
         @JsonProperty private Double postMarketChange;//0.140015,
         @JsonProperty private Double regularMarketChange;//1.89001,
         @JsonProperty private Double regularMarketChangePercent;//0.508082,
-        @JsonProperty private Integer regularMarketTime;//1609448402,
+        @JsonProperty private Long regularMarketTime;//1609448402,
         @JsonProperty private Double regularMarketPrice;//373.88,
         @JsonProperty private Double regularMarketDayHigh;//374.65,
         @JsonProperty private String regularMarketDayRange;//"371.232 - 374.65",
@@ -122,4 +128,39 @@ public class YFv7OptionChain {
         @JsonProperty private String symbol;//"SPY"
     }
 
+    public OptionChain toModel() {
+        return toModel(this);
+    }
+    public OptionChain toModel(YFv7OptionChain yfOptionChain) {
+        List<YFOptionChainResult> yfOptionChainResults = yfOptionChain.getOptionChain().getResult();
+        assert yfOptionChainResults.size() == 1;
+        YFOptionChainResult yfOptionChainResult = yfOptionChainResults.get(0);
+
+        List<YFOptionExpiration> yfOptionExpirations = yfOptionChainResult.getOptions();
+        assert yfOptionExpirations.size() == 1;
+        YFOptionExpiration yfOptionExpiration = yfOptionExpirations.get(0);
+
+        OptionChain optionChain = OptionChain.builder()
+                .symbol(yfOptionChainResult.getUnderlyingSymbol())
+                .expirationDate(dateOfEpochSecond(yfOptionExpiration.getExpirationDate()))
+                .underlyingInfo(null)   // TODO
+                .expirationDates(dateOfEpochSecond(yfOptionChainResult.getExpirationDates()))
+                .strikes(null)          // TODO
+                .optionQuotes(null)     // TODO
+                .build();
+
+        return optionChain;
+    }
+
+
+    public static List<LocalDate> dateOfEpochSecond(List<Long> list) {
+        return list.stream().map(YFv7OptionChain::dateOfEpochSecond).collect(Collectors.toList());
+    }
+    public static LocalDate dateOfEpochSecond(Long seconds) {
+        return dateOfEpochSecond(seconds, ZoneOffset.UTC);
+    }
+    public static LocalDate dateOfEpochSecond(Long seconds, ZoneId zone) {
+        if (zone == null) { zone = ZoneOffset.UTC; }
+        return Instant.ofEpochSecond(seconds).atZone(zone).toLocalDate();
+    }
 }

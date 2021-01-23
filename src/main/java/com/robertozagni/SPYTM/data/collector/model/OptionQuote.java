@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class OptionQuote {
 
@@ -26,7 +27,7 @@ public class OptionQuote {
 
     private Boolean inTheMoney; //true
     private Double impliedVolatility; // 2.49219126953125,
-    private LocalDate lastTradeDate; //1608747716, in seconds: GMT: Wednesday 23 December 2020 18:21:56
+    private LocalDateTime lastTradeDate; //1608747716, in seconds: GMT: Wednesday 23 December 2020 18:21:56
     private Double lastPrice; // 124.45,
     private Double change; //0.0,
     private Double percentChange; //0.0,
