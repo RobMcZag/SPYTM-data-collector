@@ -3,7 +3,10 @@ package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.robertozagni.SPYTM.data.collector.model.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.*;
 import java.util.ArrayList;
@@ -11,19 +14,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data @Builder @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class YFv7OptionChain {
 
     @JsonProperty private YFv7OptionChain.YFOptionChain optionChain;
 
-    @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class YFOptionChain {
         @JsonProperty private List<YFv7OptionChain.YFOptionChainResult> result;
         @JsonProperty private String error;
     }
 
-    @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @JsonIgnoreProperties(ignoreUnknown=true)
     public static class YFOptionChainResult {
         @JsonProperty private String underlyingSymbol;
@@ -34,7 +37,7 @@ public class YFv7OptionChain {
         @JsonProperty private List<YFOptionExpiration> options;
     }
 
-    @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class YFOptionExpiration {
         @JsonProperty private Long expirationDate; // 1609718400,
         @JsonProperty private Boolean hasMiniOptions;
@@ -42,7 +45,7 @@ public class YFv7OptionChain {
         @JsonProperty private List<YFOptionQuote> puts;
     }
 
-    @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class YFOptionQuote {
         @JsonProperty private String contractSymbol; //"SPY210104C00245000",
         @JsonProperty private Double strike; //":245.0,
@@ -50,8 +53,8 @@ public class YFv7OptionChain {
         @JsonProperty private Double lastPrice; // 124.45,
         @JsonProperty private Double change; //0.0,
         @JsonProperty private Double percentChange; //0.0,
-        @JsonProperty private Integer volume; //125,
-        @JsonProperty private Integer openInterest; //153,
+        @JsonProperty private Integer volume = 0; //125,
+        @JsonProperty private Integer openInterest = 0; //153,
         @JsonProperty private Double bid; // 128.83,
         @JsonProperty private Double ask; //129.35,
         @JsonProperty private String contractSize; //"REGULAR",
@@ -61,7 +64,7 @@ public class YFv7OptionChain {
         @JsonProperty private Boolean inTheMoney; //true
     }
 
-    @Data @NoArgsConstructor @Builder @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Data @NoArgsConstructor @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class YFOptionUnderlying {
         @JsonProperty private String language; //"en-US",
         @JsonProperty private String region; //"US",
