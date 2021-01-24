@@ -1,11 +1,12 @@
 package com.robertozagni.SPYTM.data.collector.downloader.yahoo;
 
-import com.robertozagni.SPYTM.data.collector.model.OptionChain;
+import com.robertozagni.SPYTM.data.collector.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
@@ -82,7 +83,130 @@ class YFv7OptionChainTest {
         assertIterableEquals(yfOptionChainResult.getStrikes(), optionChain.getStrikes());
 
         // Underlying info & Quote
-        // OoptionContract & Quotes
+        UnderlyingInfo underlyingInfo = optionChain.getUnderlyingInfo();
+        assertNotNull(underlyingInfo);
+
+        assertEquals("SPY", underlyingInfo.getSymbol());
+        assertEquals("SPDR S&P 500", underlyingInfo.getShortName());
+        assertEquals("SPDR S&P 500 ETF Trust", underlyingInfo.getLongName());
+        assertEquals("ETF", underlyingInfo.getQuoteType());
+        assertEquals("USD", underlyingInfo.getCurrency());
+        assertEquals("US", underlyingInfo.getRegion());
+        assertEquals("en-US", underlyingInfo.getLanguage());
+        assertEquals("us_market", underlyingInfo.getMarket());
+        assertEquals(917782016, underlyingInfo.getSharesOutstanding());
+        assertEquals("Nasdaq Real Time Price", underlyingInfo.getQuoteSourceName());
+//        assertEquals(, underlyingInfo.getFirstTradeDateMilliseconds());
+//        private Long firstTradeDateMilliseconds;//728317800000, => Friday 29 January 1993 14:30:00 (EST)
+        assertEquals(LocalDateTime.parse("1993-01-29T09:30:00"), underlyingInfo.getFirstTradeDateTime());
+        assertEquals("NYSEArca", underlyingInfo.getFullExchangeName()); // Core Trading Session: 9:30 a.m. to 4:00 p.m. ET
+        assertEquals("PCX", underlyingInfo.getExchange());
+        assertEquals("CLOSED", underlyingInfo.getMarketState());
+        assertEquals("America/New_York", underlyingInfo.getExchangeTimezoneName());
+        assertEquals("EST", underlyingInfo.getExchangeTimezoneShortName());
+        assertEquals(0, underlyingInfo.getExchangeDataDelayedBy());
+        assertEquals(-18000000, underlyingInfo.getGmtOffSetMilliseconds());
+
+        List<UnderlyingQuote> underlyingQuotes = underlyingInfo.getUnderlyingQuotes();
+        assertNotNull(underlyingQuotes);
+        assertEquals(1, underlyingQuotes.size());
+        UnderlyingQuote underlyingQuote = underlyingQuotes.get(0);
+        assertEquals("SPY", underlyingQuote.getSymbol());
+        assertEquals(LocalDate.parse("2020-12-31"), underlyingQuote.getQuoteDate());
+        assertEquals(374.4, underlyingQuote.getBid());
+        assertEquals(374.4, underlyingQuote.getAsk());
+        assertEquals(9, underlyingQuote.getBidSize());
+        assertEquals(11, underlyingQuote.getAskSize());
+        assertEquals(343140335616L, underlyingQuote.getMarketCap());
+        assertEquals(1.89001, underlyingQuote.getRegularMarketChange());
+        assertEquals(0.508082, underlyingQuote.getRegularMarketChangePercent());
+        assertEquals(LocalDateTime.parse("2020-12-31T16:00:02"), underlyingQuote.getRegularMarketTime()); //1609448402, 31.12.2020 21:00:02 (EST)
+        assertEquals(373.88, underlyingQuote.getRegularMarketPrice());
+        assertEquals(374.65, underlyingQuote.getRegularMarketDayHigh());
+        assertEquals("371.232 - 374.65", underlyingQuote.getRegularMarketDayRange());
+        assertEquals(371.232, underlyingQuote.getRegularMarketDayLow());
+        assertEquals(55516031L, underlyingQuote.getRegularMarketVolume());
+        assertEquals(371.99, underlyingQuote.getRegularMarketPreviousClose());
+        assertEquals(371.78, underlyingQuote.getRegularMarketOpen());
+        assertEquals(0.0374121, underlyingQuote.getPostMarketChangePercent());
+        assertEquals(LocalDateTime.parse("2020-12-31T19:59:38"), underlyingQuote.getPostMarketTime());    //1609462778, 01.01.2021 00:59:38 (EST)
+        assertEquals(374.39, underlyingQuote.getPostMarketPrice());
+        assertEquals(0.140015, underlyingQuote.getPostMarketChange());
+        assertEquals(69860170L, underlyingQuote.getAverageDailyVolume3Month());
+        assertEquals(49412620L, underlyingQuote.getAverageDailyVolume10Day());
+        assertEquals(155.62001, underlyingQuote.getFiftyTwoWeekLowChange());
+        assertEquals(0.7130029, underlyingQuote.getFiftyTwoWeekLowChangePercent());
+        assertEquals("218.26 - 378.46", underlyingQuote.getFiftyTwoWeekRange());
+        assertEquals(-4.5799866, underlyingQuote.getFiftyTwoWeekHighChange());
+        assertEquals(-0.01210164, underlyingQuote.getFiftyTwoWeekHighChangePercent());
+        assertEquals(218.26, underlyingQuote.getFiftyTwoWeekLow());
+        assertEquals(378.46, underlyingQuote.getFiftyTwoWeekHigh());
+        assertEquals(14.03, underlyingQuote.getYtdReturn());
+        assertEquals(4.07, underlyingQuote.getTrailingThreeMonthReturns());
+        assertEquals(3.88, underlyingQuote.getTrailingThreeMonthNavReturns());
+        assertEquals(366.16095, underlyingQuote.getFiftyDayAverage());
+        assertEquals(7.719055, underlyingQuote.getFiftyDayAverageChange());
+        assertEquals(0.021081043, underlyingQuote.getFiftyDayAverageChangePercent());
+        assertEquals(340.54218, underlyingQuote.getTwoHundredDayAverage());
+        assertEquals(33.33783, underlyingQuote.getTwoHundredDayAverageChange());
+        assertEquals(0.09789633, underlyingQuote.getTwoHundredDayAverageChangePercent());
+
+        // OptionContract & Quotes
+        List<OptionContract> optionContracts = optionChain.getOptionContracts();
+        assertEquals(185, optionContracts.size());
+
+        // CALL
+        OptionContract lastCallContract = optionContracts.get(97);
+        assertEquals("SPY210104C00470000", lastCallContract.getContractSymbol());
+        assertEquals("SPY", lastCallContract.getUnderlyingSymbol());
+        assertEquals(LocalDate.parse("2021-01-04"), lastCallContract.getExpiration());
+        assertEquals(OptionContract.OptionType.CALL, lastCallContract.getOptionType());
+        assertEquals(470.0, lastCallContract.getStrike());
+        assertEquals("USD", lastCallContract.getCurrency());
+        assertEquals("REGULAR", lastCallContract.getContractSize());
+
+        List<OptionQuote> lastCallContractQuotes = lastCallContract.getQuotes();
+        assertEquals(1, lastCallContractQuotes.size());
+        OptionQuote lastCallContractQuote = lastCallContractQuotes.get(0);
+        assertEquals("SPY210104C00470000", lastCallContractQuote.getContractSymbol());
+        assertEquals(LocalDate.parse("2020-12-31"), lastCallContractQuote.getQuoteDate());
+        assertEquals(LocalDateTime.parse("2020-12-21T20:08:24"), lastCallContractQuote.getLastTradeDate()); // 1608581304
+        assertEquals(0.01, lastCallContractQuote.getLastPrice());
+        assertEquals(0.0, lastCallContractQuote.getChange());
+        assertEquals(0.0, lastCallContractQuote.getPercentChange());
+        assertEquals(0.0, lastCallContractQuote.getBid());
+        assertEquals(0.01, lastCallContractQuote.getAsk());
+        assertEquals(1, lastCallContractQuote.getVolume());  // Not in JSON, set default in YF class
+        assertEquals(5, lastCallContractQuote.getOpenInterest());
+        assertEquals(0.9687503125, lastCallContractQuote.getImpliedVolatility(), 0.0001);
+        assertEquals(false, lastCallContractQuote.getInTheMoney());
+
+        // PUT
+        OptionContract lastPutContract = optionContracts.get(184);
+        assertEquals("SPY210104P00450000", lastPutContract.getContractSymbol());
+        assertEquals("SPY", lastPutContract.getUnderlyingSymbol());
+        assertEquals(LocalDate.parse("2021-01-04"), lastPutContract.getExpiration());
+        assertEquals(OptionContract.OptionType.PUT, lastPutContract.getOptionType());
+        assertEquals(450.0, lastPutContract.getStrike());
+        assertEquals("USD", lastPutContract.getCurrency());
+        assertEquals("REGULAR", lastPutContract.getContractSize());
+
+        List<OptionQuote> lastPutContractQuotes = lastPutContract.getQuotes();
+        assertEquals(1, lastPutContractQuotes.size());
+        OptionQuote lastPutContractQuote = lastPutContractQuotes.get(0);
+        assertEquals("SPY210104P00450000", lastPutContractQuote.getContractSymbol());
+        assertEquals(LocalDate.parse("2020-12-31"), lastPutContractQuote.getQuoteDate());
+        assertEquals(LocalDateTime.parse("2020-12-22T20:25:41"), lastPutContractQuote.getLastTradeDate());
+        assertEquals(82.91, lastPutContractQuote.getLastPrice());
+        assertEquals(0.0, lastPutContractQuote.getChange());
+        assertEquals(0.0, lastPutContractQuote.getPercentChange());
+        assertEquals(75.72, lastPutContractQuote.getBid());
+        assertEquals(76.13, lastPutContractQuote.getAsk());
+        assertEquals(0, lastPutContractQuote.getVolume());  // Not in JSON, set default in YF class
+        assertEquals(0, lastPutContractQuote.getOpenInterest());
+        assertEquals(0.8437515624999999, lastPutContractQuote.getImpliedVolatility(), 0.0001);
+        assertEquals(true, lastPutContractQuote.getInTheMoney());
+
     }
 
     @Test

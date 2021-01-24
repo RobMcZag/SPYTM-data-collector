@@ -275,7 +275,10 @@ public class YFv7OptionChain {
                 .market(yfOptionUnderlying.getMarket())
                 .sharesOutstanding(yfOptionUnderlying.getSharesOutstanding())
                 .quoteSourceName(yfOptionUnderlying.getQuoteSourceName())
-                .firstTradeDateMilliseconds(yfOptionUnderlying.getFirstTradeDateMilliseconds())
+//                .firstTradeDateMilliseconds(yfOptionUnderlying.getFirstTradeDateMilliseconds())
+                .firstTradeDateTime( dateTimeOfEpochSecond(
+                                (yfOptionUnderlying.getFirstTradeDateMilliseconds()
+                                         + yfOptionUnderlying.getGmtOffSetMilliseconds())   / 1000) )
                 .fullExchangeName(yfOptionUnderlying.getFullExchangeName())
                 .exchange(yfOptionUnderlying.getExchange())
                 .marketState(yfOptionUnderlying.getMarketState())

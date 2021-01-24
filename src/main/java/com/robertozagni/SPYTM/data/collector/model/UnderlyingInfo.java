@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import java.time.LocalDateTime;
 import java.util.List;
 
 //@Entity
@@ -25,7 +26,8 @@ public class UnderlyingInfo {
     private Long sharesOutstanding;//917782016,
 
     private String quoteSourceName; //"Nasdaq Real Time Price",
-    private Long firstTradeDateMilliseconds;//728317800000, => GMT: Friday 29 January 1993 14:30:00
+//    private Long firstTradeDateMilliseconds;//728317800000, => GMT: Friday 29 January 1993 14:30:00
+    private LocalDateTime firstTradeDateTime;//728317800000, => GMT: Friday 29 January 1993 14:30:00
 
     private String fullExchangeName;//"NYSEArca",
     private String exchange;//"PCX",
