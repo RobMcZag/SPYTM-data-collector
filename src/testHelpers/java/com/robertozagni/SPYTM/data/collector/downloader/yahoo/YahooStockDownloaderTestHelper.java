@@ -14,8 +14,10 @@ public class YahooStockDownloaderTestHelper {
         File file = ResourceUtils.getFile("classpath:static/yahoo/chart_v8_APPL_w_DIV_SPLIT.json");
         return objectMapper.readValue(file, YFv8TimeSerie.class);
     }
-//    public static TimeSerie loadSampleMSFT_TimeSerie() throws IOException {
-//        return loadSampleMSFT_AVTimeSerie().toModel();
-//    }
+
+    public static YFv7OptionChain loadSampleSPY_YFv7OptionChain() throws IOException {
+        File file = ResourceUtils.getFile("classpath:static/yahoo/options_v7_SPY_next_expiration.json");
+        return objectMapper.readValue(file, YFv7OptionChain.class);
+    }
 
 }
